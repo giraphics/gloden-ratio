@@ -1,12 +1,33 @@
 import vertShaderCode from './shaders/triangle.vert.wgsl';
 import fragShaderCode from './shaders/triangle.frag.wgsl';
+import { mat4, vec3 } from 'gl-matrix';
+
+const vertexShaderGLSL = `
+	#version 450
+    layout(location = 0) in vec4 position;
+    layout(location = 1) in vec4 color;
+    layout(location = 0) out vec4 vColor;
+	void main() {
+		gl_Position = position;
+    vColor = color;
+	}
+`;
+const fragmentShaderGLSL = `
+	#version 450
+    layout(location = 0) in vec4 vColor;
+	layout(location = 0) out vec4 outColor;
+	void main() {
+		outColor = vColor;
+	}
+`;
 
 // 📈 Position Vertex Buffer Data
-const positions = new Float32Array([
+var positions = new Float32Array([
     1.0, -1.0, 0.0,
    -1.0, -1.0, 0.0,
     0.0,  1.0, 0.0
 ]);
+
 // 🎨 Color Vertex Buffer Data
 const colors = new Float32Array([
     1.0, 0.0, 0.0, // 🔴
@@ -16,7 +37,8 @@ const colors = new Float32Array([
 
 // 📇 Index Buffer Data
 const indices = new Uint16Array([ 0, 1, 2 ]);
-
+const MAX = 9;
+const ELEMENT = 4;
 export default class Renderer {
     canvas: HTMLCanvasElement;
 
@@ -42,6 +64,7 @@ export default class Renderer {
 
     commandEncoder: GPUCommandEncoder;
     passEncoder: GPURenderPassEncoder;
+    mvpMatricesData: Float32Array;
 
     constructor(canvas) {
         this.canvas = canvas;
@@ -104,7 +127,15 @@ export default class Renderer {
             return buffer;
         };
 
-        this.positionBuffer = createBuffer(positions, GPUBufferUsage.VERTEX);
+        this.mvpMatricesData = new Float32Array(MAX);
+        //this.positionBuffer = createBuffer(positions, GPUBufferUsage.VERTEX);
+        this.positionBuffer = await this.device.createBuffer({
+            size: (positions.byteLength + 3) & ~3,
+            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+          });
+
+        this.updatedata();
+
         this.colorBuffer = createBuffer(colors, GPUBufferUsage.VERTEX);
         this.indexBuffer = createBuffer(indices, GPUBufferUsage.INDEX);
 
@@ -191,6 +222,15 @@ export default class Renderer {
         this.pipeline = this.device.createRenderPipeline(pipelineDesc);
     }
 
+    updatedata = () => {
+        let offset = 0;
+        for (let x = 0; x < 3; x++) {
+            let aa = vec3.fromValues(Math.random(), Math.random(), 0);
+            this.mvpMatricesData.set(aa, 3 * offset);
+            offset++;
+        }
+    }
+
     // ↙️ Resize swapchain, frame buffer attachments
     resizeBackings() {
         // ⛓️ Swapchain
@@ -256,6 +296,11 @@ export default class Renderer {
             this.canvas.width,
             this.canvas.height
         );
+        
+        this.updatedata();
+
+        this.device.queue.writeBuffer(this.positionBuffer, 0, this.mvpMatricesData);
+
         this.passEncoder.setVertexBuffer(0, this.positionBuffer);
         this.passEncoder.setVertexBuffer(1, this.colorBuffer);
         this.passEncoder.setIndexBuffer(this.indexBuffer, 'uint16');
@@ -264,7 +309,7 @@ export default class Renderer {
 
         this.queue.submit([this.commandEncoder.finish()]);
     }
-
+      
     render = () => {
         // ⏭ Acquire next image from context
         this.colorTexture = this.context.getCurrentTexture();
