@@ -25,20 +25,33 @@ const fragmentShaderGLSL = `
 var positions = new Float32Array([
     1.0, -1.0, 0.0,
    -1.0, -1.0, 0.0,
-    0.0,  1.0, 0.0
+    0.0,  1.0, 0.0,
+    1.0, 1.0, 0.0,
+   -1.0, 1.0, 0.0,
+    0.0, -1.0, 0.0
 ]);
 
 // 🎨 Color Vertex Buffer Data
 const colors = new Float32Array([
     1.0, 0.0, 0.0, // 🔴
     0.0, 1.0, 0.0, // 🟢
-    0.0, 0.0, 1.0  // 🔵
+    0.0, 0.0, 1.0, // 🔵
+    1.0, 1.0, 0.0, // 🔴
+    0.0, 1.0, 1.0, // 🟢
+    1.0, 0.0, 1.0,  // 🔵
+    1.0, 1.0, 0.0, // 🔴
+    0.0, 1.0, 1.0, // 🟢
+    1.0, 0.0, 1.0,  // 🔵
+    1.0, 1.0, 0.0, // 🔴
+    0.0, 1.0, 1.0, // 🟢
+    1.0, 0.0, 1.0  // 🔵
 ]);
 
 // 📇 Index Buffer Data
-const indices = new Uint16Array([ 0, 1, 2 ]);
-const MAX = 9;
-const ELEMENT = 4;
+//const indices = new Uint16Array([ 0, 1, 2, 3, 4, 5 ]);
+//const INSTANCE_COUNT = 12 * 4 * 4 * 4 * 4 * 4 * 4 * 4;
+const INSTANCE_COUNT = 6;
+const ELEMENTS = 3;
 export default class Renderer {
     canvas: HTMLCanvasElement;
 
@@ -65,6 +78,7 @@ export default class Renderer {
     commandEncoder: GPUCommandEncoder;
     passEncoder: GPURenderPassEncoder;
     mvpMatricesData: Float32Array;
+    mvpMatricesDataColor: Float32Array;
 
     constructor(canvas) {
         this.canvas = canvas;
@@ -127,17 +141,35 @@ export default class Renderer {
             return buffer;
         };
 
-        this.mvpMatricesData = new Float32Array(MAX);
-        //this.positionBuffer = createBuffer(positions, GPUBufferUsage.VERTEX);
+        this.mvpMatricesData = new Float32Array(INSTANCE_COUNT * ELEMENTS);
         this.positionBuffer = await this.device.createBuffer({
-            size: (positions.byteLength + 3) & ~3,
+            size: INSTANCE_COUNT * ELEMENTS * 4 /**/,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
           });
 
+          this.mvpMatricesDataColor = new Float32Array(INSTANCE_COUNT * ELEMENTS);
+          this.colorBuffer = await this.device.createBuffer({
+        size: INSTANCE_COUNT * ELEMENTS * 4 /**/,
+        usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+        });
+
         this.updatedata();
 
-        this.colorBuffer = createBuffer(colors, GPUBufferUsage.VERTEX);
-        this.indexBuffer = createBuffer(indices, GPUBufferUsage.INDEX);
+        //this.positionBuffer = createBuffer(positions, GPUBufferUsage.VERTEX);
+        //this.colorBuffer = createBuffer(colors, GPUBufferUsage.VERTEX);
+        //this.indexBuffer = createBuffer(indices, GPUBufferUsage.INDEX);
+        let idxSize = (INSTANCE_COUNT * 2 + 3) & ~3;
+        this.indexBuffer = await this.device.createBuffer({
+            size: idxSize,
+            usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
+        });
+
+        let offset = 0;
+        const indices = new Uint16Array(idxSize / 2); /* Divide because 2 Uint16Array */
+        for (let x = 0; x < INSTANCE_COUNT; x++) {
+            indices[x] = x;
+        }
+        this.device.queue.writeBuffer(this.indexBuffer, 0, indices);
 
         // 🖍️ Shaders
         const vsmDesc = {
@@ -224,9 +256,11 @@ export default class Renderer {
 
     updatedata = () => {
         let offset = 0;
-        for (let x = 0; x < 3; x++) {
-            let aa = vec3.fromValues(Math.random(), Math.random(), 0);
-            this.mvpMatricesData.set(aa, 3 * offset);
+        for (let x = 0; x < INSTANCE_COUNT/ELEMENTS * ELEMENTS; x++) {
+            let aa = vec3.fromValues(Math.random()*2.0-1.0, Math.random()*2.0-1.0, 0);
+            this.mvpMatricesData.set(aa, ELEMENTS * offset);
+            let bb = vec3.fromValues(Math.random(), Math.random(), Math.random());
+            this.mvpMatricesDataColor.set(bb, ELEMENTS * offset);
             offset++;
         }
     }
@@ -297,14 +331,16 @@ export default class Renderer {
             this.canvas.height
         );
         
-        this.updatedata();
+        //this.updatedata();
 
         this.device.queue.writeBuffer(this.positionBuffer, 0, this.mvpMatricesData);
+        this.device.queue.writeBuffer(this.colorBuffer, 0, this.mvpMatricesDataColor);
+//        this.device.queue.writeBuffer(this.positionBuffer, 0, positions);
 
         this.passEncoder.setVertexBuffer(0, this.positionBuffer);
         this.passEncoder.setVertexBuffer(1, this.colorBuffer);
         this.passEncoder.setIndexBuffer(this.indexBuffer, 'uint16');
-        this.passEncoder.drawIndexed(3, 1);
+        this.passEncoder.drawIndexed(INSTANCE_COUNT, 1);
         this.passEncoder.endPass();
 
         this.queue.submit([this.commandEncoder.finish()]);
