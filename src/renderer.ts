@@ -1,6 +1,7 @@
 import vertShaderCode from './shaders/triangle.vert.wgsl';
 import fragShaderCode from './shaders/triangle.frag.wgsl';
 import { mat4, vec3 } from 'gl-matrix';
+import Binding from './binding';
 
 const vertexShaderGLSL = `
 	#version 450
@@ -21,53 +22,26 @@ const fragmentShaderGLSL = `
 	}
 `;
 
-// 📈 Position Vertex Buffer Data
-var positions = new Float32Array([
-    1.0, -1.0, 0.0,
-   -1.0, -1.0, 0.0,
-    0.0,  1.0, 0.0,
-    1.0, 1.0, 0.0,
-   -1.0, 1.0, 0.0,
-    0.0, -1.0, 0.0
-]);
-
-// 🎨 Color Vertex Buffer Data
-const colors = new Float32Array([
-    1.0, 0.0, 0.0, // 🔴
-    0.0, 1.0, 0.0, // 🟢
-    0.0, 0.0, 1.0, // 🔵
-    1.0, 1.0, 0.0, // 🔴
-    0.0, 1.0, 1.0, // 🟢
-    1.0, 0.0, 1.0,  // 🔵
-    1.0, 1.0, 0.0, // 🔴
-    0.0, 1.0, 1.0, // 🟢
-    1.0, 0.0, 1.0,  // 🔵
-    1.0, 1.0, 0.0, // 🔴
-    0.0, 1.0, 1.0, // 🟢
-    1.0, 0.0, 1.0  // 🔵
-]);
-
-// 📇 Index Buffer Data
-//const indices = new Uint16Array([ 0, 1, 2, 3, 4, 5 ]);
-//const INSTANCE_COUNT = 12 * 4 * 4 * 4 * 4 * 4 * 4 * 4;
-const INSTANCE_COUNT = 6;
+// Index Buffer Data
+const VERTEX_COUNT = 6*100;
 const ELEMENTS = 3;
 export default class Renderer {
     canvas: HTMLCanvasElement;
+    binding: Binding;
 
-    // ⚙️ API Data Structures
+    // API Data Structures
     adapter: GPUAdapter;
     device: GPUDevice;
     queue: GPUQueue;
 
-    // 🎞️ Frame Backings
+    // Frame Backings
     context: GPUCanvasContext;
     colorTexture: GPUTexture;
     colorTextureView: GPUTextureView;
     depthTexture: GPUTexture;
     depthTextureView: GPUTextureView;
 
-    // 🔺 Resources
+    // Resources
     positionBuffer: GPUBuffer;
     colorBuffer: GPUBuffer;
     indexBuffer: GPUBuffer;
@@ -77,14 +51,15 @@ export default class Renderer {
 
     commandEncoder: GPUCommandEncoder;
     passEncoder: GPURenderPassEncoder;
-    mvpMatricesData: Float32Array;
-    mvpMatricesDataColor: Float32Array;
+    position: Float32Array;
+    color: Float32Array;
 
-    constructor(canvas) {
+    constructor(canvas, binding) {
         this.canvas = canvas;
+        this.binding = binding;
     }
 
-    // 🏎️ Start the rendering engine
+    // Start the rendering engine
     async start() {
         if (await this.initializeAPI()) {
             this.resizeBackings();
@@ -93,22 +68,22 @@ export default class Renderer {
         }
     }
 
-    // 🌟 Initialize WebGPU
+    // Initialize WebGPU
     async initializeAPI(): Promise<boolean> {
         try {
-            // 🏭 Entry to WebGPU
+            // Entry to WebGPU
             const entry: GPU = navigator.gpu;
             if (!entry) {
                 return false;
             }
 
-            // 🔌 Physical Device Adapter
+            // Physical Device Adapter
             this.adapter = await entry.requestAdapter();
 
-            // 💻 Logical Device
+            // Logical Device
             this.device = await this.adapter.requestDevice();
 
-            // 📦 Queue
+            // Queue
             this.queue = this.device.queue;
         } catch (e) {
             console.error(e);
@@ -118,14 +93,14 @@ export default class Renderer {
         return true;
     }
 
-    // 🍱 Initialize resources to render triangle (buffers, shaders, pipeline)
+    // Initialize resources to render triangle (buffers, shaders, pipeline)
     async initializeResources() {
-        // 🔺 Buffers
+        // Buffers
         const createBuffer = (
             arr: Float32Array | Uint16Array,
             usage: number
         ) => {
-            // 📏 Align to 4 bytes (thanks @chrimsonite)
+            // Align to 4 bytes (thanks @chrimsonite)
             let desc = {
                 size: (arr.byteLength + 3) & ~3,
                 usage,
@@ -141,24 +116,21 @@ export default class Renderer {
             return buffer;
         };
 
-        this.mvpMatricesData = new Float32Array(INSTANCE_COUNT * ELEMENTS);
+        this.position = new Float32Array(VERTEX_COUNT * ELEMENTS);
         this.positionBuffer = await this.device.createBuffer({
-            size: INSTANCE_COUNT * ELEMENTS * 4 /**/,
+            size: VERTEX_COUNT * ELEMENTS * 4 /**/,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
           });
 
-          this.mvpMatricesDataColor = new Float32Array(INSTANCE_COUNT * ELEMENTS);
-          this.colorBuffer = await this.device.createBuffer({
-        size: INSTANCE_COUNT * ELEMENTS * 4 /**/,
-        usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+        this.color = new Float32Array(VERTEX_COUNT * ELEMENTS);
+        this.colorBuffer = await this.device.createBuffer({
+            size: VERTEX_COUNT * ELEMENTS * 4 /**/,
+            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
         });
 
         this.updatedata();
 
-        //this.positionBuffer = createBuffer(positions, GPUBufferUsage.VERTEX);
-        //this.colorBuffer = createBuffer(colors, GPUBufferUsage.VERTEX);
-        //this.indexBuffer = createBuffer(indices, GPUBufferUsage.INDEX);
-        let idxSize = (INSTANCE_COUNT * 2 + 3) & ~3;
+        let idxSize = (VERTEX_COUNT * 2 + 3) & ~3;
         this.indexBuffer = await this.device.createBuffer({
             size: idxSize,
             usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
@@ -166,12 +138,12 @@ export default class Renderer {
 
         let offset = 0;
         const indices = new Uint16Array(idxSize / 2); /* Divide because 2 Uint16Array */
-        for (let x = 0; x < INSTANCE_COUNT; x++) {
+        for (let x = 0; x < VERTEX_COUNT; x++) {
             indices[x] = x;
         }
         this.device.queue.writeBuffer(this.indexBuffer, 0, indices);
 
-        // 🖍️ Shaders
+        // Shaders
         const vsmDesc = {
             code: vertShaderCode
         };
@@ -182,9 +154,9 @@ export default class Renderer {
         };
         this.fragModule = this.device.createShaderModule(fsmDesc);
 
-        // ⚗️ Graphics Pipeline
+        // Graphics Pipeline
 
-        // 🔣 Input Assembly
+        // Input Assembly
         const positionAttribDesc: GPUVertexAttribute = {
             shaderLocation: 0, // [[location(0)]]
             offset: 0,
@@ -206,25 +178,25 @@ export default class Renderer {
             stepMode: 'vertex'
         };
 
-        // 🌑 Depth
+        // Depth
         const depthStencil: GPUDepthStencilState = {
             depthWriteEnabled: true,
             depthCompare: 'less',
             format: 'depth24plus-stencil8'
         };
 
-        // 🦄 Uniform Data
+        // Uniform Data
         const pipelineLayoutDesc = { bindGroupLayouts: [] };
         const layout = this.device.createPipelineLayout(pipelineLayoutDesc);
 
-        // 🎭 Shader Stages
+        // Shader Stages
         const vertex: GPUVertexState = {
             module: this.vertModule,
             entryPoint: 'main',
             buffers: [positionBufferDesc, colorBufferDesc]
         };
 
-        // 🌀 Color/Blend State
+        // Color/Blend State
         const colorState: GPUColorTargetState = {
             format: 'bgra8unorm'
         };
@@ -235,7 +207,7 @@ export default class Renderer {
             targets: [colorState]
         };
 
-        // 🟨 Rasterization
+        // Rasterization
         const primitive: GPUPrimitiveState = {
             frontFace: 'cw',
             cullMode: 'none',
@@ -256,18 +228,18 @@ export default class Renderer {
 
     updatedata = () => {
         let offset = 0;
-        for (let x = 0; x < INSTANCE_COUNT/ELEMENTS * ELEMENTS; x++) {
-            let aa = vec3.fromValues(Math.random()*2.0-1.0, Math.random()*2.0-1.0, 0);
-            this.mvpMatricesData.set(aa, ELEMENTS * offset);
+        for (let x = 0; x < VERTEX_COUNT/ELEMENTS * ELEMENTS; x++) {
+            let aa = vec3.fromValues(Math.random() * 2.0 - 1.0, Math.random() * 2.0 - 1.0, 0);
+            this.position.set(aa, ELEMENTS * offset);
             let bb = vec3.fromValues(Math.random(), Math.random(), Math.random());
-            this.mvpMatricesDataColor.set(bb, ELEMENTS * offset);
+            this.color.set(bb, ELEMENTS * offset);
             offset++;
         }
     }
 
-    // ↙️ Resize swapchain, frame buffer attachments
+    // Resize swapchain, frame buffer attachments
     resizeBackings() {
-        // ⛓️ Swapchain
+        // Swapchain
         if (!this.context) {
             this.context = this.canvas.getContext('webgpu');
             const canvasConfig: GPUCanvasConfiguration = {
@@ -290,7 +262,7 @@ export default class Renderer {
         this.depthTextureView = this.depthTexture.createView();
     }
 
-    // ✍️ Write commands to send to the GPU
+    // Write commands to send to the GPU
     encodeCommands() {
         let colorAttachment: GPURenderPassColorAttachment = {
             view: this.colorTextureView,
@@ -313,7 +285,7 @@ export default class Renderer {
 
         this.commandEncoder = this.device.createCommandEncoder();
 
-        // 🖌️ Encode drawing commands
+        // Encode drawing commands
         this.passEncoder = this.commandEncoder.beginRenderPass(renderPassDesc);
         this.passEncoder.setPipeline(this.pipeline);
         this.passEncoder.setViewport(
@@ -331,30 +303,29 @@ export default class Renderer {
             this.canvas.height
         );
         
-        //this.updatedata();
+        this.updatedata();
 
-        this.device.queue.writeBuffer(this.positionBuffer, 0, this.mvpMatricesData);
-        this.device.queue.writeBuffer(this.colorBuffer, 0, this.mvpMatricesDataColor);
-//        this.device.queue.writeBuffer(this.positionBuffer, 0, positions);
+        this.device.queue.writeBuffer(this.positionBuffer, 0, this.position);
+        this.device.queue.writeBuffer(this.colorBuffer, 0, this.color);
 
         this.passEncoder.setVertexBuffer(0, this.positionBuffer);
         this.passEncoder.setVertexBuffer(1, this.colorBuffer);
         this.passEncoder.setIndexBuffer(this.indexBuffer, 'uint16');
-        this.passEncoder.drawIndexed(INSTANCE_COUNT, 1);
+        this.passEncoder.drawIndexed(this.binding.vextexCount, 1);
         this.passEncoder.endPass();
 
         this.queue.submit([this.commandEncoder.finish()]);
     }
       
     render = () => {
-        // ⏭ Acquire next image from context
+        // Acquire next image from context
         this.colorTexture = this.context.getCurrentTexture();
         this.colorTextureView = this.colorTexture.createView();
 
-        // 📦 Write and submit commands to queue
+        // Write and submit commands to queue
         this.encodeCommands();
 
-        // ➿ Refresh canvas
+        // Refresh canvas
         requestAnimationFrame(this.render);
     };
 }

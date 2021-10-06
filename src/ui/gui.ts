@@ -1,10 +1,15 @@
+import Binding from './../binding';
+
 var mainarea = null;
 
 export default class Gui {
-    constructor() {
+    binding: Binding;
+
+    constructor(binding: Binding) {
+        this.binding = binding;
     }
 
-    start(){
+    start(binding: Binding){
         LiteGUI.init(); 
 
         var mainmenu = new LiteGUI.Menubar("mainmenubar");
@@ -41,7 +46,7 @@ export default class Gui {
         mainarea.content.appendChild(canvas);
 
         //split mainarea
-        this.createSidePanel();
+        this.createSidePanel(this.binding);
 
         mainarea.getSection(0).split("vertical",[null,"100px"],true);
         mainarea.getSection(0).onresize = function() {
@@ -52,7 +57,7 @@ export default class Gui {
         LiteGUI.bind( docked_bottom,"closed",function() { LiteGUI.mainarea.getSection(0).merge() });
         //mainarea.resize();
 
-        var dialog = this.createWidgetsDialog();
+        var dialog = this.createWidgetsDialog(this.binding);
         var dialog2 = this.createTableDialog();
         var dialog3 = this.createComplexListDialog();
 
@@ -68,17 +73,18 @@ export default class Gui {
         mainmenu.add("edit/clear");
             
         mainmenu.add("view/bottom panel", { callback: function() { docked_bottom.show(); } });
-        mainmenu.add("view/fixed size", { callback: function() { LiteGUI.setWindowSize(1000,600); } });
+        mainmenu.add("view/fixed size", { callback: function() { LiteGUI.setWindowSize(1000, 600); } });
         mainmenu.add("view/");
-        mainmenu.add("view/side panel", { callback: function() { this.createSidePanel(); } });
+        mainmenu.add("view/side panel", { callback: function() { this.createSidePanel(this.binding); } });
         mainmenu.add("view/maximize", { callback: function() { LiteGUI.setWindowSize(); } });
 
         mainmenu.add("debug/dialog", { callback: function() { 
             this.createDialog();
         }});
 
-        mainmenu.add("debug/message", { callback: function() { 
-            LiteGUI.showMessage("This is an example of message");
+        mainmenu.add("debug/message", { callback: function() {
+            binding.vextexCount = 600; 
+            LiteGUI.showMessage("Setting Vertex Count 600.");
         }});
 
         mainmenu.add("debug/modal", { callback: function() { 
@@ -95,7 +101,7 @@ export default class Gui {
         /////////////////////////////////////////////////////////////////////////////
     }
 
-    createSidePanel()
+    createSidePanel(binding: Binding)
     {
         mainarea.split("horizontal",[null,340],true);
 
@@ -109,10 +115,10 @@ export default class Gui {
 
         window.sidepanel = docked;
 
-        this.updateSidePanel( docked );
+        this.updateSidePanel( docked, binding );
     }
 
-    updateSidePanel( root )
+    updateSidePanel( root, binding: Binding )
     {
         root = root || window.sidepanel;
         root.content.innerHTML = "";
@@ -157,8 +163,7 @@ export default class Gui {
             console.log("Widget change: " + name + " -> " + value );
         };
         root.content.appendChild(widgets.root);
-
-        widgets.addSlider("slider",10,{min:1,max:100,step:1});
+        widgets.addSlider("Vertex count",10,{min:1,max:600,step:1, callback: function(x : number) { binding.vextexCount = Math.floor(x);; }});
         widgets.addSeparator();
         widgets.addVector2("vector2",[10,20], {min:0});
         widgets.addVector3("vector3",[10,20,30], {min:0});
@@ -184,7 +189,7 @@ export default class Gui {
         //mainarea.resize();
     }
 
-    createWidgetsDialog()
+    createWidgetsDialog(binding: Binding)
     {
         //test floating panel
         var name = "Dialog_" + ((Math.random() * 100)>>0);
@@ -198,7 +203,7 @@ export default class Gui {
         minimenu.attachToPanel(dialog);
 
         var widgets = new LiteGUI.Inspector();
-        widgets.addButton("button","Update", { callback: function() { updateSidePanel(); } });
+        widgets.addButton("button","Update", { callback: function() { this.updateSidePanel(binding); } });
         widgets.addString("string","foo");
         widgets.addNumber("number",10, {min:0});
         widgets.addTree("tree",{ person: "javi", info: { age: 32, location: "barcelona" }, role: "worker"} );
