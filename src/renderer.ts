@@ -23,7 +23,7 @@ const fragmentShaderGLSL = `
 `;
 
 // Index Buffer Data
-const VERTEX_COUNT = 6*100;
+const VERTEX_COUNT = 500000;
 const ELEMENTS = 3;
 export default class Renderer {
     canvas: HTMLCanvasElement;
@@ -51,6 +51,7 @@ export default class Renderer {
 
     commandEncoder: GPUCommandEncoder;
     passEncoder: GPURenderPassEncoder;
+    speed: Float32Array;
     position: Float32Array;
     color: Float32Array;
 
@@ -120,13 +121,21 @@ export default class Renderer {
         this.positionBuffer = await this.device.createBuffer({
             size: VERTEX_COUNT * ELEMENTS * 4 /**/,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-          });
+        });
 
         this.color = new Float32Array(VERTEX_COUNT * ELEMENTS);
         this.colorBuffer = await this.device.createBuffer({
             size: VERTEX_COUNT * ELEMENTS * 4 /**/,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
         });
+
+        this.speed = new Float32Array(VERTEX_COUNT * ELEMENTS);
+        let off = 0;
+        for (let x = 0; x < VERTEX_COUNT / 3; x++) {
+            let aa = vec3.fromValues(Math.random() / 100.0, Math.random() / 100.0, 0.0);
+            this.speed.set(aa, 3 * off);
+            off++;
+        }
 
         this.updatedata();
 
@@ -211,7 +220,7 @@ export default class Renderer {
         const primitive: GPUPrimitiveState = {
             frontFace: 'cw',
             cullMode: 'none',
-            topology: 'triangle-list'
+            topology: 'point-list'
         };
 
         const pipelineDesc: GPURenderPipelineDescriptor = {
@@ -228,14 +237,31 @@ export default class Renderer {
 
     updatedata = () => {
         let offset = 0;
-        for (let x = 0; x < VERTEX_COUNT/ELEMENTS * ELEMENTS; x++) {
+        for (let x = 0; x < VERTEX_COUNT / 3; x++) {
             let aa = vec3.fromValues(Math.random() * 2.0 - 1.0, Math.random() * 2.0 - 1.0, 0);
-            this.position.set(aa, ELEMENTS * offset);
+            //let aa = vec3.fromValues(Math.random(), Math.random(), 0.0);
+            this.position.set(aa, 3 * offset);
             let bb = vec3.fromValues(Math.random(), Math.random(), Math.random());
-            this.color.set(bb, ELEMENTS * offset);
+            this.color.set(bb, 3 * offset);
             offset++;
         }
     }
+
+    updatePosition = () => {
+        let step = 0.001;
+        for (let x = 0; x < VERTEX_COUNT; x+=3) {
+            if ((this.position[x] > 1.0) || (this.position[x] < -1.0)) {
+                this.speed[x] = -this.speed[x];
+            }
+            
+            if ((this.position[x + 1] > 1.0) || (this.position[x + 1] < -1.0)) {
+                this.speed[x + 1] = -this.speed[x + 1];
+            }
+    
+            this.position[x] += this.speed[x];
+            this.position[x + 1] += this.speed[x + 1];
+        }
+    }    
 
     // Resize swapchain, frame buffer attachments
     resizeBackings() {
@@ -303,7 +329,7 @@ export default class Renderer {
             this.canvas.height
         );
         
-        this.updatedata();
+        this.updatePosition();
 
         this.device.queue.writeBuffer(this.positionBuffer, 0, this.position);
         this.device.queue.writeBuffer(this.colorBuffer, 0, this.color);
