@@ -157,6 +157,16 @@ export default class Gui {
         widgets.addVector2("vector2",[10,20], {min:0});
         widgets.addVector3("vector3",[10,20,30], {min:0});
         widgets.addVector4("vector4",[0.1,0.2,0.3,0.4], {min:0});
+        widgets.addSection("Event Logger");
+        widgets.addSection("Scene Camera Controller");
+        widgets.addSection("Vehicle Operations");
+        widgets.addSection("Display");
+        widgets.addSection("System Status Message");
+        widgets.addSection("Track Object");
+        widgets.addSection("Prior-Map");
+        widgets.addSection("Planning & Controls Gen 1");
+        widgets.addSection("Path Tracker Point Cloud");
+        widgets.addSection("Radar Point Cloud");
         widgets.addSection("ISN");
         widgets.addSection("MC Localization");
         widgets.addSection("Trajactories");
