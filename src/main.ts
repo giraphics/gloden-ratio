@@ -10,9 +10,9 @@ window.onload = function(){
 }
 
 const canvas = document.getElementById('webgpu-canvas') as HTMLCanvasElement;
-const renderer = new Renderer(canvas, binding);
+const renderer = new Renderer(canvas, binding, 0);
 renderer.start();
 
 const canvas2 = document.getElementById('webgpu-canvas2') as HTMLCanvasElement;
-const renderer2 = new Renderer(canvas2, binding);
+const renderer2 = new Renderer(canvas2, binding, 1);
 renderer2.start();

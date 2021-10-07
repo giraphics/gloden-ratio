@@ -18,30 +18,20 @@ export default class Gui {
         mainarea = new LiteGUI.Area({ id: "mainarea", content_id:"canvasarea", height: "calc( 100% - 20px )", main:true, inmediateResize: true});
         LiteGUI.add( mainarea );
 
-		// var mainarea2 = new LiteGUI.Area("mainarea",{content_id:"canvasLeftArea", autoresize: true, inmediateResize: true});
-		// mainarea2.split("vertical",[200,null], true);
-		// LiteGUI.add( mainarea2 );
-
         var canvas = document.getElementById("webgpu-canvas");
-        // var ma = document.getElementById("mainarea");
-        // ma.appendChild(canvas);
-        canvas.width = 640;
+        canvas.width = 630; // 800
         canvas.height = 640;
-        mainarea.onresize = function() { };
-        // mainarea.content.appendChild(canvas);
 
         var canvas2 = document.getElementById("webgpu-canvas2");
-        // var ma2 = document.getElementById("mainarea");
-        // ma2.appendChild(canvas2);
-
-        canvas2.width = 640;
+        canvas2.width = 630;
         canvas2.height = 640;
-        // mainarea.content.appendChild(canvas2);
+
+        mainarea.onresize = function() { };
 
         //split mainarea
         this.createSidePanel(this.binding);
 
-        mainarea.getSection(0).split("vertical",[null,"300px"],true);
+        mainarea.getSection(0).split("vertical",[null,"250px"],true);
         mainarea.getSection(0).getSection(0).split("horizontal",[null,"600px"],true);
         mainarea.getSection(0).getSection(0).getSection(0).add( canvas );
         mainarea.getSection(0).getSection(0).getSection(1).add( canvas2 );
@@ -112,11 +102,11 @@ export default class Gui {
 
         //tabs 
         var tabs_widget = new LiteGUI.Tabs();
-        tabs_widget.addTab("Info");
+        tabs_widget.addTab("ViewerApp");
         tabs_widget.addTab("Introspector",{selected:true, width: "100%", height: 200});
         tabs_widget.addTab("Extra");
 
-        tabs_widget.getTabContent("Info").appendChild( LiteGUI.createElement( "strong",null,"Example of code inside tab container") );
+        tabs_widget.getTabContent("ViewerApp").appendChild( LiteGUI.createElement( "strong",null,"Viewer-App") );
 
         // A dummy tree show
         var mytree = { id: "System Health Message", 
@@ -167,6 +157,10 @@ export default class Gui {
         widgets.addVector2("vector2",[10,20], {min:0});
         widgets.addVector3("vector3",[10,20,30], {min:0});
         widgets.addVector4("vector4",[0.1,0.2,0.3,0.4], {min:0});
+        widgets.addSection("ISN");
+        widgets.addSection("MC Localization");
+        widgets.addSection("Trajactories");
+        widgets.addSection("Tracked Entities");
         widgets.addSection("Text stuff");
         widgets.addString("string","foo");
         widgets.addStringButton("string button","foo", { callback_button: function(v) { console.log("Button: " + v); } });
@@ -193,7 +187,7 @@ export default class Gui {
         //test floating panel
         var name = "Dialog_" + ((Math.random() * 100)>>0);
         var dialog = new LiteGUI.Dialog({ id: name, title:name, close: true, minimize: true, width: 300, scroll: true, resizable:true, draggable: true, detachable: true });
-        dialog.show('fade');
+        // dialog.show('fade');
 
         //test menu in panel
         var minimenu = new LiteGUI.Menubar("minimenu");
@@ -227,8 +221,8 @@ export default class Gui {
     createComplexListDialog()
     {
         var dialog = new LiteGUI.Dialog( { title:"Complex List", close: true, minimize: true, width: 300, height: 400, scroll: true, resizable:true, draggable: true} );
-        dialog.show();
-        dialog.setPosition( 600,200 );
+        // dialog.show();
+        // dialog.setPosition( 600,200 );
 
         var list = new LiteGUI.ComplexList({height: "100%"});
         dialog.add( list );
@@ -244,12 +238,11 @@ export default class Gui {
         return dialog;
     }
 
-
     createTableDialog()
     {
         var dialog = new LiteGUI.Dialog( { title:"Table dialog", close: true, minimize: true, width: 300, scroll: true, resizable:true, draggable: true} );
-        dialog.show();
-        dialog.setPosition( 200,200 );
+        // dialog.show();
+        // dialog.setPosition( 200,200 );
         dialog.addButton("Randomize", inner );
 
         var table = new LiteGUI.Table({scrollable:true});

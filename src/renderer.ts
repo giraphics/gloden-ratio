@@ -28,6 +28,7 @@ const ELEMENTS = 3;
 export default class Renderer {
     canvas: HTMLCanvasElement;
     binding: Binding;
+    primitive: Number; // 0: point, 1: Line
 
     // API Data Structures
     adapter: GPUAdapter;
@@ -55,9 +56,10 @@ export default class Renderer {
     position: Float32Array;
     color: Float32Array;
 
-    constructor(canvas, binding) {
+    constructor(canvas, binding, primitive) {
         this.canvas = canvas;
         this.binding = binding;
+        this.primitive = primitive;
     }
 
     // Start the rendering engine
@@ -220,7 +222,7 @@ export default class Renderer {
         const primitive: GPUPrimitiveState = {
             frontFace: 'cw',
             cullMode: 'none',
-            topology: 'point-list'
+            topology: this.primitive ? 'line-list' : 'point-list' 
         };
 
         const pipelineDesc: GPURenderPipelineDescriptor = {
