@@ -17,45 +17,39 @@ export default class Gui {
 
         mainarea = new LiteGUI.Area({ id: "mainarea", content_id:"canvasarea", height: "calc( 100% - 20px )", main:true, inmediateResize: true});
         LiteGUI.add( mainarea );
-    
-        //create main canvas to test redraw
-        //var canvas = document.createElement("canvas");
-        //canvas.id = 'webgpu-canvas';
+
+		// var mainarea2 = new LiteGUI.Area("mainarea",{content_id:"canvasLeftArea", autoresize: true, inmediateResize: true});
+		// mainarea2.split("vertical",[200,null], true);
+		// LiteGUI.add( mainarea2 );
+
         var canvas = document.getElementById("webgpu-canvas");
-
-        var ma = document.getElementById("mainarea");
-        ma.appendChild(canvas);
-
-        canvas.width = canvas.height = 640;
-        // canvas.times = 0;
-        // canvas.redraw = () => {
-            // Todo call webgl draw
-        // 	var rect = canvas.parentNode.getClientRects()[0];
-        // 	canvas.width = rect.width;
-        // 	canvas.height = rect.height;
-        // 	var ctx = canvas.getContext("2d");
-        // 	ctx.clearRect(0,0,this.width,this.height);
-        // 	ctx.lineWidth = 1;
-        // 	ctx.strokeStyle = "#AAF";
-        // 	ctx.strokeRect(10.5,10.5,this.width-20,this.height-20);
-        // 	ctx.strokeText("Times: " + this.times,20.5,30.5);
-        // 	this.times += 1;
-        // };
-
+        // var ma = document.getElementById("mainarea");
+        // ma.appendChild(canvas);
+        canvas.width = 640;
+        canvas.height = 640;
         mainarea.onresize = function() { };
-        mainarea.content.appendChild(canvas);
+        // mainarea.content.appendChild(canvas);
+
+        var canvas2 = document.getElementById("webgpu-canvas2");
+        // var ma2 = document.getElementById("mainarea");
+        // ma2.appendChild(canvas2);
+
+        canvas2.width = 640;
+        canvas2.height = 640;
+        // mainarea.content.appendChild(canvas2);
 
         //split mainarea
         this.createSidePanel(this.binding);
 
-        mainarea.getSection(0).split("vertical",[null,"100px"],true);
-        mainarea.getSection(0).onresize = function() {
-        };
+        mainarea.getSection(0).split("vertical",[null,"300px"],true);
+        mainarea.getSection(0).getSection(0).split("horizontal",[null,"600px"],true);
+        mainarea.getSection(0).getSection(0).getSection(0).add( canvas );
+        mainarea.getSection(0).getSection(0).getSection(1).add( canvas2 );
+        mainarea.getSection(0).onresize = function() {};
 
         var docked_bottom = new LiteGUI.Panel({ id: "bottom_panel", title:"Docked panel",hide:true});
         mainarea.getSection(0).getSection(1).add( docked_bottom );
         LiteGUI.bind( docked_bottom,"closed",function() { LiteGUI.mainarea.getSection(0).merge() });
-        //mainarea.resize();
 
         var dialog = this.createWidgetsDialog(this.binding);
         var dialog2 = this.createTableDialog();
@@ -93,12 +87,6 @@ export default class Gui {
             dialog.addButton("Accept",{ close: true });
             dialog.addButton("Cancel",{ close: 'fade' });
         }});
-
-        /////////////////////////////////////////////////////////////////////////////
-        //(async () => {
-        //})();
-
-        /////////////////////////////////////////////////////////////////////////////
     }
 
     createSidePanel(binding: Binding)
@@ -106,7 +94,6 @@ export default class Gui {
         mainarea.split("horizontal",[null,340],true);
 
         var docked = new LiteGUI.Panel("right_panel", {title:'Docked panel', close: true});
-
         mainarea.getSection(1).add( docked );
 
         //docked.dockTo( mainarea.getSection(1).content,"full");
@@ -126,29 +113,41 @@ export default class Gui {
         //tabs 
         var tabs_widget = new LiteGUI.Tabs();
         tabs_widget.addTab("Info");
-        tabs_widget.addTab("ABCD",{selected:true, width: "100%", height: 200});
+        tabs_widget.addTab("Introspector",{selected:true, width: "100%", height: 200});
         tabs_widget.addTab("Extra");
 
         tabs_widget.getTabContent("Info").appendChild( LiteGUI.createElement( "strong",null,"Example of code inside tab container") );
 
-        //tree
-        var mytree = { id: "Rootnode", 
+        // A dummy tree show
+        var mytree = { id: "System Health Message", 
                 children: [
-                    { id: "Child1" },
-                    { id: "Child2", children: [
-                        { id: "SubChild1" },
-                        { id: "SubChild2" },
-                        { id: "SubChild3" },
-                        { id: "SubChild4" }
-                    ]},
-                    { id: "Child3" },
+                    { id: "Frequency: 5" },
+                    { id: "Number of messages: 2" },
+                    { id: "Time Stamp: 2021/6/6 12:48:31.999", 
+                        children: [
+                            { id: "ID: 01" },
+                            { id: "Data: 1", 
+                                children: [
+                                    { id: "value: " },
+                                ] 
+                            }
+                        ]},
+                    { id: "Time Stamp: 2021/6/6 12:49:32.8", 
+                        children: [
+                            { id: "ID: 02" },
+                            { id: "Data: 2", 
+                                children: [
+                                    { id: "valee: " },
+                                ] 
+                            }
+                        ]},
                 ]};
 
         var litetree = new LiteGUI.Tree( mytree, { allow_rename: true });
         LiteGUI.bind( litetree.root, "item_selected", function(e) {
             console.log("Node selected: ", e.detail); 
         });
-        var tree_tab_content = tabs_widget.getTabContent("ABCD");
+        var tree_tab_content = tabs_widget.getTabContent("Introspector");
         tree_tab_content.appendChild( litetree.root )
 
         litetree.insertItem( {id:"FOO"}, "Child2",2 );

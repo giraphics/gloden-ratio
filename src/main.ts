@@ -10,6 +10,9 @@ window.onload = function(){
 }
 
 const canvas = document.getElementById('webgpu-canvas') as HTMLCanvasElement;
-canvas.width = canvas.height = 640;
 const renderer = new Renderer(canvas, binding);
 renderer.start();
+
+const canvas2 = document.getElementById('webgpu-canvas2') as HTMLCanvasElement;
+const renderer2 = new Renderer(canvas2, binding);
+renderer2.start();

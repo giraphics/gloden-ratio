@@ -69,10 +69,10 @@ export default class Renderer {
         }
     }
 
-    // Initialize WebGPU
+    // Initialize 
     async initializeAPI(): Promise<boolean> {
         try {
-            // Entry to WebGPU
+            // Entry to GPU
             const entry: GPU = navigator.gpu;
             if (!entry) {
                 return false;
