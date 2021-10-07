@@ -45,37 +45,38 @@ export default class Gui {
         var dialog2 = this.createTableDialog();
         var dialog3 = this.createComplexListDialog();
 
-        mainmenu.add("file/Parminder");
-        mainmenu.add("file/new");
-        mainmenu.add("file/open");
-        mainmenu.add("file/save");
-        mainmenu.add("edit/undo");
-        mainmenu.add("edit/redo");
-        mainmenu.add("edit/");
-        mainmenu.add("edit/copy", { callback: function(){ console.log("COPY"); } });
-        mainmenu.add("edit/paste");
-        mainmenu.add("edit/clear");
+        mainmenu.add("File/Parminder");
+        mainmenu.add("File/new");
+        mainmenu.add("File/open");
+        mainmenu.add("File/save");
+        mainmenu.add("Edit/undo");
+        mainmenu.add("Edit/redo");
+        mainmenu.add("Edit/");
+        mainmenu.add("Edit/copy", { callback: function(){ console.log("COPY"); } });
+        mainmenu.add("Edit/paste");
+        mainmenu.add("Edit/clear");
             
-        mainmenu.add("view/bottom panel", { callback: function() { docked_bottom.show(); } });
-        mainmenu.add("view/fixed size", { callback: function() { LiteGUI.setWindowSize(1000, 600); } });
-        mainmenu.add("view/");
-        mainmenu.add("view/side panel", { callback: function() { this.createSidePanel(this.binding); } });
-        mainmenu.add("view/maximize", { callback: function() { LiteGUI.setWindowSize(); } });
+        mainmenu.add("View/bottom panel", { callback: function() { docked_bottom.show(); } });
+        mainmenu.add("View/fixed size", { callback: function() { LiteGUI.setWindowSize(1000, 600); } });
+        mainmenu.add("View/");
+        mainmenu.add("View/side panel", { callback: function() { this.createSidePanel(this.binding); } });
+        mainmenu.add("View/maximize", { callback: function() { LiteGUI.setWindowSize(); } });
 
-        mainmenu.add("debug/dialog", { callback: function() { 
-            this.createDialog();
+        mainmenu.add("Vertex-Count/1000", { callback: function() {
+            binding.vextexCount = 1000; 
+            LiteGUI.showMessage("Setting Vertex Count to 1000.");
         }});
-
-        mainmenu.add("debug/message", { callback: function() {
-            binding.vextexCount = 600; 
-            LiteGUI.showMessage("Setting Vertex Count 600.");
+        mainmenu.add("Vertex-Count/50000", { callback: function() {
+            binding.vextexCount = 50000; 
+            LiteGUI.showMessage("Setting Vertex Count to 50000.");
         }});
-
-        mainmenu.add("debug/modal", { callback: function() { 
-            var dialog = new LiteGUI.Panel("blarg",{width:300,height:100,close:true, content:"This is an example of modal dialog"}); 
-            dialog.makeModal();
-            dialog.addButton("Accept",{ close: true });
-            dialog.addButton("Cancel",{ close: 'fade' });
+        mainmenu.add("Vertex-Count/Quater Million 250000", { callback: function() {
+            binding.vextexCount = 250000; 
+            LiteGUI.showMessage("Setting Vertex Count to 250000.");
+        }});
+        mainmenu.add("Vertex-Count/Half Million(500000)", { callback: function() {
+            binding.vextexCount = 500000; 
+            LiteGUI.showMessage("Setting Vertex Count to 500000.");
         }});
     }
 
@@ -152,11 +153,39 @@ export default class Gui {
             console.log("Widget change: " + name + " -> " + value );
         };
         root.content.appendChild(widgets.root);
-        widgets.addSlider("Vertex count",10,{min:1,max:500000,step:1, empadding: "10", callback: function(x : number) { binding.vextexCount = Math.floor(x);; }});
+        widgets.addSlider("Vertex count",15,{min:1,max:500000,step:1, empadding: "10", callback: function(x : number) { binding.vextexCount = Math.floor(x);; }});
         widgets.addSeparator();
         widgets.addVector2("vector2",[10,20], {min:0});
         widgets.addVector3("vector3",[10,20,30], {min:0});
         widgets.addVector4("vector4",[0.1,0.2,0.3,0.4], {min:0});
+
+        widgets.addSection("Scene Camera Controller");
+        widgets.addCheckbox("checkbox",true,{callback: function(value) { console.log("Checkbox pressed: " + value); } });
+        widgets.addButton("Serialize","Save",{callback: function(name) { console.log("Button pressed: " + name); } });
+        widgets.addButtons("Serialize",["Save","Load","New"],{callback: function(name) { console.log("Button pressed: " + name); } });
+        widgets.addButton(null,"Save");
+        widgets.addSeparator();
+        widgets.addColor("Color",[0,1,0]);
+        widgets.addPad("Pad",[0.5,0.5], function(v){ console.log(v); });
+        widgets.addFile("File","test.png");
+        widgets.addLine("Line",[[0.5,1],[0.75,0.25]],{defaulty:0,width:120}); 
+
+        widgets.addSection("Tracked Entities");
+        widgets.addString("string","Type");
+        widgets.addCheckbox("Vehicle",true,{callback: function(value) { console.log("Vehicle pressed: " + value); } });
+        widgets.addCheckbox("Pedestrain",true,{callback: function(value) { console.log("Pedestrain pressed: " + value); } });
+        widgets.addCheckbox("Bicyclist",true,{callback: function(value) { console.log("Bicyclist pressed: " + value); } });
+        widgets.addCheckbox("Traffic Cone",true,{callback: function(value) { console.log("Traffic pressed: " + value); } });
+        widgets.addCheckbox("Barrier",true,{callback: function(value) { console.log("Barrier pressed: " + value); } });
+        widgets.addCheckbox("Generic Object",true,{callback: function(value) { console.log("Generic Object pressed: " + value); } });
+        widgets.addCheckbox("Construction Zone Sign",true,{callback: function(value) { console.log("Construction Zone Sign pressed: " + value); } });
+        widgets.addSeparator();
+        widgets.addStringButton("string button","foo", { callback_button: function(v) { console.log("Button: " + v); } });
+        widgets.addTextarea(null,"Some text", {height: 100});
+        var w = widgets.addCombo("combo","D",{values:["A","B","C","D","E"], callback: function(name) { console.log("Combo selected: " + name); }});
+        widgets.addComboButtons("combobuttons","B",{values:["A","B","C","D"], callback: function(name) { console.log("Combo button selected: " + name); }});
+        widgets.addTags("tags","pop",{values:["rap","blues","pop","jazz"], callback: function(tags) { console.log("Tag added: " + JSON.stringify(tags) ); }});
+
         widgets.addSection("Event Logger");
         widgets.addSection("Scene Camera Controller");
         widgets.addSection("Vehicle Operations");
@@ -170,38 +199,21 @@ export default class Gui {
         widgets.addSection("ISN");
         widgets.addSection("MC Localization");
         widgets.addSection("Trajactories");
-        widgets.addSection("Tracked Entities");
-        widgets.addSection("Text stuff");
-        widgets.addString("string","foo");
-        widgets.addStringButton("string button","foo", { callback_button: function(v) { console.log("Button: " + v); } });
-        widgets.addTextarea(null,"a really long silly text", {height: 100});
-        var w = widgets.addCombo("combo","javi",{values:["foo","faa","super largo texto que no cabe entero","javi","nada"], callback: function(name) { console.log("Combo selected: " + name); }});
-        widgets.addComboButtons("combobuttons","javi",{values:["foo","faa","javi","nada"], callback: function(name) { console.log("Combo button selected: " + name); }});
-        widgets.addTags("tags","pop",{values:["rap","blues","pop","jazz"], callback: function(tags) { console.log("Tag added: " + JSON.stringify(tags) ); }});
-        widgets.addSection("Other widgets");
-        widgets.addCheckbox("checkbox",true,{callback: function(value) { console.log("Checkbox pressed: " + value); } });
-        widgets.addButton("Serialize","Save",{callback: function(name) { console.log("Button pressed: " + name); } });
-        widgets.addButtons("Serialize",["Save","Load","New"],{callback: function(name) { console.log("Button pressed: " + name); } });
-        widgets.addButton(null,"Save");
-        widgets.addSeparator();
-        widgets.addColor("Color",[0,1,0]);
-        widgets.addPad("Pad",[0.5,0.5], function(v){ console.log(v); });
-        widgets.addFile("File","test.png");
-        widgets.addLine("Line",[[0.5,1],[0.75,0.25]],{defaulty:0,width:120}); 
 
         //mainarea.resize();
     }
 
     createWidgetsDialog(binding: Binding)
     {
-        //test floating panel
-        var name = "Dialog_" + ((Math.random() * 100)>>0);
+        // test floating panel
+        //var name = "Dialog_" + ((Math.random() * 100)>>0);
+        var name = "Mock Dialog";
         var dialog = new LiteGUI.Dialog({ id: name, title:name, close: true, minimize: true, width: 300, scroll: true, resizable:true, draggable: true, detachable: true });
-        // dialog.show('fade');
+        dialog.show('fade');
 
         //test menu in panel
         var minimenu = new LiteGUI.Menubar("minimenu");
-        minimenu.add("file/new");
+        minimenu.add("File/new");
         minimenu.add("center", {onclick: function() { dialog.center() } });
         minimenu.attachToPanel(dialog);
 
@@ -250,9 +262,9 @@ export default class Gui {
 
     createTableDialog()
     {
-        var dialog = new LiteGUI.Dialog( { title:"Table dialog", close: true, minimize: true, width: 300, scroll: true, resizable:true, draggable: true} );
-        // dialog.show();
-        // dialog.setPosition( 200,200 );
+        var dialog = new LiteGUI.Dialog( { title:"Visualization Tools Team", close: true, minimize: true, width: 300, scroll: true, resizable:true, draggable: true} );
+        dialog.show();
+        dialog.setPosition( 200,200 );
         dialog.addButton("Randomize", inner );
 
         var table = new LiteGUI.Table({scrollable:true});
@@ -262,7 +274,7 @@ export default class Gui {
 
         var data = [];
 
-        for(var i = 0; i < 10; ++i)
+        for(var i = 0; i < 13; ++i)
             data.push({
                     name: randomName(),
                     age: 30,
@@ -272,9 +284,8 @@ export default class Gui {
         inner();
 
         function randomName(){
-            var names = ["Phil","Smith","Gregory","Martin","James","Coleman","Jerry","Helen","Mary"];
+            var names = ["Dana","Richard","Rohit","Paul","Bala","Parminder","Tong","Anurag","Saravanan","Renee","Sarah","Sofia","Mary"];
             var name = [];
-            name.push( names[Math.floor(Math.random()*names.length)] );
             name.push( names[Math.floor(Math.random()*names.length)] );
             return name.join(" ");
         }
