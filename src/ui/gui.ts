@@ -18,23 +18,15 @@ export default class Gui {
         mainarea = new LiteGUI.Area({ id: "mainarea", content_id:"canvasarea", height: "calc( 100% - 20px )", main:true, inmediateResize: true});
         LiteGUI.add( mainarea );
 
-        var canvas = document.getElementById("webgpu-canvas");
-        canvas.width = 630; // 800
-        canvas.height = 640;
-
-        var canvas2 = document.getElementById("webgpu-canvas2");
-        canvas2.width = 630;
-        canvas2.height = 640;
-
         mainarea.onresize = function() { };
 
-        //split mainarea
         this.createSidePanel(this.binding);
 
         mainarea.getSection(0).split("vertical",[null,"250px"],true);
         mainarea.getSection(0).getSection(0).split("horizontal",[null,"600px"],true);
-        mainarea.getSection(0).getSection(0).getSection(0).add( canvas );
-        mainarea.getSection(0).getSection(0).getSection(1).add( canvas2 );
+
+        this.createCanvas();
+
         mainarea.getSection(0).onresize = function() {};
 
         var docked_bottom = new LiteGUI.Panel({ id: "bottom_panel", title:"Docked panel",hide:true});
@@ -78,6 +70,38 @@ export default class Gui {
             binding.vextexCount = 500000; 
             LiteGUI.showMessage("Setting Vertex Count to 500000.");
         }});
+    }
+
+    createCanvas()
+    {
+        // Create canvas 1
+        var canvas = document.createElement("canvas");
+        canvas.id = 'webgpu-canvas';
+        canvas.width = 630; // 800
+        canvas.height = 640;
+
+        canvas.redraw = function() {
+			var rect = canvas.parentNode.getClientRects()[0];
+            canvas.width = rect.width > 630 ? 630 : rect.width;
+            canvas.height = rect.height > 640 ? 640 : rect.height;
+        }
+		
+        mainarea.getSection(0).getSection(0).getSection(0).onresize = function() { canvas.redraw(); };
+        mainarea.getSection(0).getSection(0).getSection(0).content.appendChild(canvas);
+
+        // Create canvas 2
+        var canvas2 = document.createElement("canvas");
+        canvas2.id = 'webgpu-canvas2';
+        canvas2.width = 630;
+        canvas2.height = 640;
+
+        canvas2.redraw = function() {
+			var rect = canvas2.parentNode.getClientRects()[0];
+            canvas2.width = rect.width > 630 ? 630 : rect.width;
+            canvas2.height = rect.height > 640 ? 640 : rect.height;
+		}
+		mainarea.getSection(0).getSection(0).getSection(1).onresize = function() { canvas2.redraw(); };
+        mainarea.getSection(0).getSection(0).getSection(1).content.appendChild(canvas2);
     }
 
     createSidePanel(binding: Binding)
