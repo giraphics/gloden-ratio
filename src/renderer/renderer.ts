@@ -1,7 +1,7 @@
 import vertShaderCode from './shaders/triangle.vert.wgsl';
 import fragShaderCode from './shaders/triangle.frag.wgsl';
 import { mat4, vec3 } from 'gl-matrix';
-import Binding from './binding';
+import Binding from '../binding';
 
 const vertexShaderGLSL = `
 	#version 450

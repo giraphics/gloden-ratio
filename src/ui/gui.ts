@@ -1,4 +1,4 @@
-import Binding from './../binding';
+import Binding from '../binder/binding';
 
 var mainarea = null;
 

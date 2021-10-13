@@ -1,4 +1,4 @@
-import Renderer from './renderer';
+import Renderer from './renderer/renderer';
 import Gui from './ui/gui';
 import Binding from './binding';
 
