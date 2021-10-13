@@ -1,6 +1,6 @@
 import Renderer from './renderer/renderer';
 import Gui from './ui/gui';
-import Binding from './binding';
+import Binding from './binder/binding';
 
 const binding = new Binding();
 const gui = new Gui(binding);

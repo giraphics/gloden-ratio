@@ -1,7 +1,7 @@
 import vertShaderCode from './shaders/triangle.vert.wgsl';
 import fragShaderCode from './shaders/triangle.frag.wgsl';
 import { mat4, vec3 } from 'gl-matrix';
-import Binding from '../binding';
+import Binding from '../binder/binding';
 
 const vertexShaderGLSL = `
 	#version 450
@@ -21,41 +21,116 @@ const fragmentShaderGLSL = `
 		outColor = vColor;
 	}
 `;
-
 // Index Buffer Data
 const VERTEX_COUNT = 500000;
 const ELEMENTS = 3;
-export default class Renderer {
-    canvas: HTMLCanvasElement;
-    binding: Binding;
-    primitive: Number; // 0: point, 1: Line
 
-    // API Data Structures
-    adapter: GPUAdapter;
+export class RenderObject {
     device: GPUDevice;
-    queue: GPUQueue;
-
-    // Frame Backings
-    context: GPUCanvasContext;
-    colorTexture: GPUTexture;
-    colorTextureView: GPUTextureView;
-    depthTexture: GPUTexture;
-    depthTextureView: GPUTextureView;
 
     // Resources
     positionBuffer: GPUBuffer;
     colorBuffer: GPUBuffer;
-    indexBuffer: GPUBuffer;
-    vertModule: GPUShaderModule;
-    fragModule: GPUShaderModule;
-    pipeline: GPURenderPipeline;
+//    indexBuffer: GPUBuffer;
+//    vertModule: GPUShaderModule;
+//    fragModule: GPUShaderModule;
+//    pipeline: GPURenderPipeline;
 
-    commandEncoder: GPUCommandEncoder;
-    passEncoder: GPURenderPassEncoder;
+//    commandEncoder: GPUCommandEncoder;
+//    passEncoder: GPURenderPassEncoder;
     speed: Float32Array;
     position: Float32Array;
     color: Float32Array;
 
+    constructor(device: GPUDevice) {
+        this.device = device;
+    }
+
+    async allocate()
+    {
+        this.position = new Float32Array(VERTEX_COUNT * ELEMENTS);
+        this.positionBuffer = await this.device.createBuffer({
+            size: VERTEX_COUNT * ELEMENTS * 4 /**/,
+            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+        });        
+
+        this.color = new Float32Array(VERTEX_COUNT * ELEMENTS);
+        this.colorBuffer = await this.device.createBuffer({
+            size: VERTEX_COUNT * ELEMENTS * 4 /**/,
+            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+        });
+
+        this.speed = new Float32Array(VERTEX_COUNT * ELEMENTS);
+        let off = 0;
+        for (let x = 0; x < VERTEX_COUNT / 3; x++) {
+            let aa = vec3.fromValues(Math.random() / 100.0, Math.random() / 100.0, 0.0);
+            this.speed.set(aa, 3 * off);
+            off++;
+        }
+
+        this.updatedata();
+    }
+
+    private updatedata = () => {
+        let offset = 0;
+        for (let x = 0; x < VERTEX_COUNT / 3; x++) {
+            let aa = vec3.fromValues(Math.random() * 2.0 - 1.0, Math.random() * 2.0 - 1.0, 0);
+            this.position.set(aa, 3 * offset);
+            let bb = vec3.fromValues(Math.random(), Math.random(), Math.random());
+            this.color.set(bb, 3 * offset);
+            offset++;
+        }
+    }
+
+    private updatePosition = () => {
+        let step = 0.001;
+        for (let x = 0; x < VERTEX_COUNT; x+=3) {
+            if ((this.position[x] > 1.0) || (this.position[x] < -1.0)) {
+                this.speed[x] = -this.speed[x];
+            }
+            
+            if ((this.position[x + 1] > 1.0) || (this.position[x + 1] < -1.0)) {
+                this.speed[x + 1] = -this.speed[x + 1];
+            }
+    
+            this.position[x] += this.speed[x];
+            this.position[x + 1] += this.speed[x + 1];
+        }
+    }
+}
+
+export default class Renderer {
+    private canvas: HTMLCanvasElement;
+    private binding: Binding;
+    private primitive: Number; // 0: point, 1: Line
+
+    // API Data Structures
+    private adapter: GPUAdapter;
+    private device: GPUDevice;
+    private queue: GPUQueue;
+
+    // Frame Backings
+    private context: GPUCanvasContext;
+    private colorTexture: GPUTexture;
+    private colorTextureView: GPUTextureView;
+    private depthTexture: GPUTexture;
+    private depthTextureView: GPUTextureView;
+    
+    private object: RenderObject;
+
+    // Resources
+    //colorBuffer: GPUBuffer;
+    private indexBuffer: GPUBuffer;
+    private vertModule: GPUShaderModule;
+    private fragModule: GPUShaderModule;
+    private pipeline: GPURenderPipeline;
+
+    private commandEncoder: GPUCommandEncoder;
+    private passEncoder: GPURenderPassEncoder;
+    // speed: Float32Array;
+    // position: Float32Array;
+    // color: Float32Array;
+    
     constructor(canvas, binding, primitive) {
         this.canvas = canvas;
         this.binding = binding;
@@ -88,6 +163,7 @@ export default class Renderer {
 
             // Queue
             this.queue = this.device.queue;
+            this.object = new RenderObject(this.device);
         } catch (e) {
             console.error(e);
             return false;
@@ -119,27 +195,7 @@ export default class Renderer {
             return buffer;
         };
 
-        this.position = new Float32Array(VERTEX_COUNT * ELEMENTS);
-        this.positionBuffer = await this.device.createBuffer({
-            size: VERTEX_COUNT * ELEMENTS * 4 /**/,
-            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-        });
-
-        this.color = new Float32Array(VERTEX_COUNT * ELEMENTS);
-        this.colorBuffer = await this.device.createBuffer({
-            size: VERTEX_COUNT * ELEMENTS * 4 /**/,
-            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-        });
-
-        this.speed = new Float32Array(VERTEX_COUNT * ELEMENTS);
-        let off = 0;
-        for (let x = 0; x < VERTEX_COUNT / 3; x++) {
-            let aa = vec3.fromValues(Math.random() / 100.0, Math.random() / 100.0, 0.0);
-            this.speed.set(aa, 3 * off);
-            off++;
-        }
-
-        this.updatedata();
+        this.object.allocate();
 
         let idxSize = (VERTEX_COUNT * 2 + 3) & ~3;
         this.indexBuffer = await this.device.createBuffer({
@@ -237,33 +293,33 @@ export default class Renderer {
         this.pipeline = this.device.createRenderPipeline(pipelineDesc);
     }
 
-    updatedata = () => {
-        let offset = 0;
-        for (let x = 0; x < VERTEX_COUNT / 3; x++) {
-            let aa = vec3.fromValues(Math.random() * 2.0 - 1.0, Math.random() * 2.0 - 1.0, 0);
-            //let aa = vec3.fromValues(Math.random(), Math.random(), 0.0);
-            this.position.set(aa, 3 * offset);
-            let bb = vec3.fromValues(Math.random(), Math.random(), Math.random());
-            this.color.set(bb, 3 * offset);
-            offset++;
-        }
-    }
+    // updatedata = () => {
+    //     let offset = 0;
+    //     for (let x = 0; x < VERTEX_COUNT / 3; x++) {
+    //         let aa = vec3.fromValues(Math.random() * 2.0 - 1.0, Math.random() * 2.0 - 1.0, 0);
+    //         //let aa = vec3.fromValues(Math.random(), Math.random(), 0.0);
+    //         this.object.position.set(aa, 3 * offset);
+    //         let bb = vec3.fromValues(Math.random(), Math.random(), Math.random());
+    //         this.object.color.set(bb, 3 * offset);
+    //         offset++;
+    //     }
+    // }
 
-    updatePosition = () => {
-        let step = 0.001;
-        for (let x = 0; x < VERTEX_COUNT; x+=3) {
-            if ((this.position[x] > 1.0) || (this.position[x] < -1.0)) {
-                this.speed[x] = -this.speed[x];
-            }
+    // updatePosition = () => {
+    //     let step = 0.001;
+    //     for (let x = 0; x < VERTEX_COUNT; x+=3) {
+    //         if ((this.object.position[x] > 1.0) || (this.object.position[x] < -1.0)) {
+    //             this.speed[x] = -this.speed[x];
+    //         }
             
-            if ((this.position[x + 1] > 1.0) || (this.position[x + 1] < -1.0)) {
-                this.speed[x + 1] = -this.speed[x + 1];
-            }
+    //         if ((this.object.position[x + 1] > 1.0) || (this.object.position[x + 1] < -1.0)) {
+    //             this.speed[x + 1] = -this.speed[x + 1];
+    //         }
     
-            this.position[x] += this.speed[x];
-            this.position[x + 1] += this.speed[x + 1];
-        }
-    }    
+    //         this.object.position[x] += this.speed[x];
+    //         this.object.position[x + 1] += this.speed[x + 1];
+    //     }
+    // }    
 
     // Resize swapchain, frame buffer attachments
     resizeBackings() {
@@ -291,7 +347,7 @@ export default class Renderer {
     }
 
     // Write commands to send to the GPU
-    encodeCommands() {
+    renderScene() {
         let colorAttachment: GPURenderPassColorAttachment = {
             view: this.colorTextureView,
             loadValue: { r: 0, g: 0, b: 0, a: 1 },
@@ -331,13 +387,13 @@ export default class Renderer {
             this.canvas.height
         );
         
-        this.updatePosition();
+        this.object.updatePosition();
 
-        this.device.queue.writeBuffer(this.positionBuffer, 0, this.position);
-        this.device.queue.writeBuffer(this.colorBuffer, 0, this.color);
+        this.device.queue.writeBuffer(this.object.positionBuffer, 0, this.object.position);
+        this.device.queue.writeBuffer(this.object.colorBuffer, 0, this.object.color);
 
-        this.passEncoder.setVertexBuffer(0, this.positionBuffer);
-        this.passEncoder.setVertexBuffer(1, this.colorBuffer);
+        this.passEncoder.setVertexBuffer(0, this.object.positionBuffer);
+        this.passEncoder.setVertexBuffer(1, this.object.colorBuffer);
         this.passEncoder.setIndexBuffer(this.indexBuffer, 'uint16');
         this.passEncoder.drawIndexed(this.binding.vextexCount, 1);
         this.passEncoder.endPass();
@@ -351,7 +407,7 @@ export default class Renderer {
         this.colorTextureView = this.colorTexture.createView();
 
         // Write and submit commands to queue
-        this.encodeCommands();
+        this.renderScene();
 
         // Refresh canvas
         requestAnimationFrame(this.render);
