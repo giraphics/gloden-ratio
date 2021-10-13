@@ -178,6 +178,16 @@ export class RenderObject {
             this.position[x] += this.speed[x];
             this.position[x + 1] += this.speed[x + 1];
         }
+
+    }
+
+    draw = (passEncoder) => {
+        passEncoder.setPipeline(this.pipeline);
+
+        this.device.queue.writeBuffer(this.positionBuffer, 0, this.position);
+        this.device.queue.writeBuffer(this.colorBuffer, 0, this.color);
+        passEncoder.setVertexBuffer(0, this.positionBuffer);
+        passEncoder.setVertexBuffer(1, this.colorBuffer);
     }
 }
 
@@ -201,17 +211,10 @@ export default class Renderer {
     private object: RenderObject;
 
     // Resources
-    //colorBuffer: GPUBuffer;
     private indexBuffer: GPUBuffer;
-    // private vertModule: GPUShaderModule;
-    // private fragModule: GPUShaderModule;
-    //private pipeline: GPURenderPipeline;
 
     private commandEncoder: GPUCommandEncoder;
     private passEncoder: GPURenderPassEncoder;
-    // speed: Float32Array;
-    // position: Float32Array;
-    // color: Float32Array;
     
     constructor(canvas, binding, primitive) {
         this.canvas = canvas;
@@ -295,34 +298,6 @@ export default class Renderer {
 
     }
 
-    // updatedata = () => {
-    //     let offset = 0;
-    //     for (let x = 0; x < VERTEX_COUNT / 3; x++) {
-    //         let aa = vec3.fromValues(Math.random() * 2.0 - 1.0, Math.random() * 2.0 - 1.0, 0);
-    //         //let aa = vec3.fromValues(Math.random(), Math.random(), 0.0);
-    //         this.object.position.set(aa, 3 * offset);
-    //         let bb = vec3.fromValues(Math.random(), Math.random(), Math.random());
-    //         this.object.color.set(bb, 3 * offset);
-    //         offset++;
-    //     }
-    // }
-
-    // updatePosition = () => {
-    //     let step = 0.001;
-    //     for (let x = 0; x < VERTEX_COUNT; x+=3) {
-    //         if ((this.object.position[x] > 1.0) || (this.object.position[x] < -1.0)) {
-    //             this.speed[x] = -this.speed[x];
-    //         }
-            
-    //         if ((this.object.position[x + 1] > 1.0) || (this.object.position[x + 1] < -1.0)) {
-    //             this.speed[x + 1] = -this.speed[x + 1];
-    //         }
-    
-    //         this.object.position[x] += this.speed[x];
-    //         this.object.position[x + 1] += this.speed[x + 1];
-    //     }
-    // }    
-
     // Resize swapchain, frame buffer attachments
     resizeBackings() {
         // Swapchain
@@ -373,7 +348,6 @@ export default class Renderer {
 
         // Encode drawing commands
         this.passEncoder = this.commandEncoder.beginRenderPass(renderPassDesc);
-        this.passEncoder.setPipeline(this.object.pipeline);
         this.passEncoder.setViewport(
             0,
             0,
@@ -390,14 +364,13 @@ export default class Renderer {
         );
         
         this.object.updatePosition();
+        this.object.draw(this.passEncoder);
 
-        this.device.queue.writeBuffer(this.object.positionBuffer, 0, this.object.position);
-        this.device.queue.writeBuffer(this.object.colorBuffer, 0, this.object.color);
-
-        this.passEncoder.setVertexBuffer(0, this.object.positionBuffer);
-        this.passEncoder.setVertexBuffer(1, this.object.colorBuffer);
+        // this.device.queue.writeBuffer(this.object.positionBuffer, 0, this.object.position);
+        // this.device.queue.writeBuffer(this.object.colorBuffer, 0, this.object.color);
         this.passEncoder.setIndexBuffer(this.indexBuffer, 'uint16');
         this.passEncoder.drawIndexed(this.binding.vextexCount, 1);
+
         this.passEncoder.endPass();
 
         this.queue.submit([this.commandEncoder.finish()]);
