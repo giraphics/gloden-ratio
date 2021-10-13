@@ -26,38 +26,38 @@ const VERTEX_COUNT = 500000;
 const ELEMENTS = 3;
 
 export class RenderObject {
-    device: GPUDevice;
-    primitive: Number; // 0: point, 1: Line
+    private device: GPUDevice;
+    private primitive: Number; // 0: point, 1: Line
+    private binding: Binding;
 
     // Resources
-    positionBuffer: GPUBuffer;
-    colorBuffer: GPUBuffer;
-//    indexBuffer: GPUBuffer;
-   vertModule: GPUShaderModule;
-   fragModule: GPUShaderModule;
-    pipeline: GPURenderPipeline;
+    private positionBuffer: GPUBuffer;
+    private colorBuffer: GPUBuffer;
+    private indexBuffer: GPUBuffer;
+    private vertModule: GPUShaderModule;
+    private fragModule: GPUShaderModule;
+    private pipeline: GPURenderPipeline;
 
-//    commandEncoder: GPUCommandEncoder;
-//    passEncoder: GPURenderPassEncoder;
-    speed: Float32Array;
-    position: Float32Array;
-    color: Float32Array;
+    private speed: Float32Array;
+    private position: Float32Array;
+    private color: Float32Array;
 
-    constructor(device: GPUDevice, primitive) {
+    constructor(device: GPUDevice, primitive: Number, binding: Binding) {
         this.device = device;
         this.primitive = primitive;
+        this.binding = binding;
     }
 
     async allocate()
     {
         this.position = new Float32Array(VERTEX_COUNT * ELEMENTS);
-        this.positionBuffer = await this.device.createBuffer({
+        this.positionBuffer = /*await*/ this.device.createBuffer({
             size: VERTEX_COUNT * ELEMENTS * 4 /**/,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
         });        
 
         this.color = new Float32Array(VERTEX_COUNT * ELEMENTS);
-        this.colorBuffer = await this.device.createBuffer({
+        this.colorBuffer = /*await*/ this.device.createBuffer({
             size: VERTEX_COUNT * ELEMENTS * 4 /**/,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
         });
@@ -69,6 +69,17 @@ export class RenderObject {
             this.speed.set(aa, 3 * off);
             off++;
         }
+        let idxSize = (VERTEX_COUNT * 2 + 3) & ~3;
+        this.indexBuffer = /*await*/ this.device.createBuffer({
+            size: idxSize,
+            usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
+        });
+
+        const indices = new Uint16Array(idxSize / 2); /* Divide because 2 Uint16Array */
+        for (let x = 0; x < VERTEX_COUNT; x++) {
+            indices[x] = x;
+        }
+        this.device.queue.writeBuffer(this.indexBuffer, 0, indices);
 
         this.updatedata();
 
@@ -164,7 +175,7 @@ export class RenderObject {
         }
     }
 
-    updatePosition = () => {
+    update = () => {
         let step = 0.001;
         for (let x = 0; x < VERTEX_COUNT; x+=3) {
             if ((this.position[x] > 1.0) || (this.position[x] < -1.0)) {
@@ -178,16 +189,19 @@ export class RenderObject {
             this.position[x] += this.speed[x];
             this.position[x + 1] += this.speed[x + 1];
         }
-
     }
 
     draw = (passEncoder) => {
+        this.update(); // Update the position first
+
         passEncoder.setPipeline(this.pipeline);
 
         this.device.queue.writeBuffer(this.positionBuffer, 0, this.position);
         this.device.queue.writeBuffer(this.colorBuffer, 0, this.color);
         passEncoder.setVertexBuffer(0, this.positionBuffer);
         passEncoder.setVertexBuffer(1, this.colorBuffer);
+        passEncoder.setIndexBuffer(this.indexBuffer, 'uint16');
+        passEncoder.drawIndexed(this.binding.vextexCount, 1);
     }
 }
 
@@ -208,15 +222,12 @@ export default class Renderer {
     private depthTexture: GPUTexture;
     private depthTextureView: GPUTextureView;
     
-    private object: RenderObject;
-
-    // Resources
-    private indexBuffer: GPUBuffer;
-
     private commandEncoder: GPUCommandEncoder;
     private passEncoder: GPURenderPassEncoder;
-    
-    constructor(canvas, binding, primitive) {
+
+    private object: RenderObject;
+
+    constructor(canvas: HTMLCanvasElement, binding: Binding, primitive: Number) {
         this.canvas = canvas;
         this.binding = binding;
         this.primitive = primitive;
@@ -248,7 +259,7 @@ export default class Renderer {
 
             // Queue
             this.queue = this.device.queue;
-            this.object = new RenderObject(this.device, this.primitive);
+            this.object = new RenderObject(this.device, this.primitive, this.binding);
         } catch (e) {
             console.error(e);
             return false;
@@ -259,43 +270,7 @@ export default class Renderer {
 
     // Initialize resources to render triangle (buffers, shaders, pipeline)
     async initializeResources() {
-        // Buffers
-        const createBuffer = (
-            arr: Float32Array | Uint16Array,
-            usage: number
-        ) => {
-            // Align to 4 bytes (thanks @chrimsonite)
-            let desc = {
-                size: (arr.byteLength + 3) & ~3,
-                usage,
-                mappedAtCreation: true
-            };
-            let buffer = this.device.createBuffer(desc);
-            const writeArray =
-                arr instanceof Uint16Array
-                    ? new Uint16Array(buffer.getMappedRange())
-                    : new Float32Array(buffer.getMappedRange());
-            writeArray.set(arr);
-            buffer.unmap();
-            return buffer;
-        };
-
         this.object.allocate();
-
-        let idxSize = (VERTEX_COUNT * 2 + 3) & ~3;
-        this.indexBuffer = await this.device.createBuffer({
-            size: idxSize,
-            usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
-        });
-
-        const indices = new Uint16Array(idxSize / 2); /* Divide because 2 Uint16Array */
-        for (let x = 0; x < VERTEX_COUNT; x++) {
-            indices[x] = x;
-        }
-        this.device.queue.writeBuffer(this.indexBuffer, 0, indices);
-
-        // Graphics Pipeline
-
     }
 
     // Resize swapchain, frame buffer attachments
@@ -323,8 +298,16 @@ export default class Renderer {
         this.depthTextureView = this.depthTexture.createView();
     }
 
-    // Write commands to send to the GPU
-    renderScene() {
+    renderScene() {       
+        // Todo do it for each
+        this.object.draw(this.passEncoder);
+    }
+      
+    render = () => {
+        // Acquire next image from context
+        this.colorTexture = this.context.getCurrentTexture();
+        this.colorTextureView = this.colorTexture.createView();
+
         let colorAttachment: GPURenderPassColorAttachment = {
             view: this.colorTextureView,
             loadValue: { r: 0, g: 0, b: 0, a: 1 },
@@ -362,27 +345,12 @@ export default class Renderer {
             this.canvas.width,
             this.canvas.height
         );
-        
-        this.object.updatePosition();
-        this.object.draw(this.passEncoder);
-
-        // this.device.queue.writeBuffer(this.object.positionBuffer, 0, this.object.position);
-        // this.device.queue.writeBuffer(this.object.colorBuffer, 0, this.object.color);
-        this.passEncoder.setIndexBuffer(this.indexBuffer, 'uint16');
-        this.passEncoder.drawIndexed(this.binding.vextexCount, 1);
-
-        this.passEncoder.endPass();
-
-        this.queue.submit([this.commandEncoder.finish()]);
-    }
-      
-    render = () => {
-        // Acquire next image from context
-        this.colorTexture = this.context.getCurrentTexture();
-        this.colorTextureView = this.colorTexture.createView();
-
+ 
         // Write and submit commands to queue
         this.renderScene();
+
+        this.passEncoder.endPass();
+        this.queue.submit([this.commandEncoder.finish()]);
 
         // Refresh canvas
         requestAnimationFrame(this.render);
