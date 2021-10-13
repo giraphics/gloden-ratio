@@ -27,14 +27,15 @@ const ELEMENTS = 3;
 
 export class RenderObject {
     device: GPUDevice;
+    primitive: Number; // 0: point, 1: Line
 
     // Resources
     positionBuffer: GPUBuffer;
     colorBuffer: GPUBuffer;
 //    indexBuffer: GPUBuffer;
-//    vertModule: GPUShaderModule;
-//    fragModule: GPUShaderModule;
-//    pipeline: GPURenderPipeline;
+   vertModule: GPUShaderModule;
+   fragModule: GPUShaderModule;
+    pipeline: GPURenderPipeline;
 
 //    commandEncoder: GPUCommandEncoder;
 //    passEncoder: GPURenderPassEncoder;
@@ -42,8 +43,9 @@ export class RenderObject {
     position: Float32Array;
     color: Float32Array;
 
-    constructor(device: GPUDevice) {
+    constructor(device: GPUDevice, primitive) {
         this.device = device;
+        this.primitive = primitive;
     }
 
     async allocate()
@@ -69,146 +71,6 @@ export class RenderObject {
         }
 
         this.updatedata();
-    }
-
-    private updatedata = () => {
-        let offset = 0;
-        for (let x = 0; x < VERTEX_COUNT / 3; x++) {
-            let aa = vec3.fromValues(Math.random() * 2.0 - 1.0, Math.random() * 2.0 - 1.0, 0);
-            this.position.set(aa, 3 * offset);
-            let bb = vec3.fromValues(Math.random(), Math.random(), Math.random());
-            this.color.set(bb, 3 * offset);
-            offset++;
-        }
-    }
-
-    private updatePosition = () => {
-        let step = 0.001;
-        for (let x = 0; x < VERTEX_COUNT; x+=3) {
-            if ((this.position[x] > 1.0) || (this.position[x] < -1.0)) {
-                this.speed[x] = -this.speed[x];
-            }
-            
-            if ((this.position[x + 1] > 1.0) || (this.position[x + 1] < -1.0)) {
-                this.speed[x + 1] = -this.speed[x + 1];
-            }
-    
-            this.position[x] += this.speed[x];
-            this.position[x + 1] += this.speed[x + 1];
-        }
-    }
-}
-
-export default class Renderer {
-    private canvas: HTMLCanvasElement;
-    private binding: Binding;
-    private primitive: Number; // 0: point, 1: Line
-
-    // API Data Structures
-    private adapter: GPUAdapter;
-    private device: GPUDevice;
-    private queue: GPUQueue;
-
-    // Frame Backings
-    private context: GPUCanvasContext;
-    private colorTexture: GPUTexture;
-    private colorTextureView: GPUTextureView;
-    private depthTexture: GPUTexture;
-    private depthTextureView: GPUTextureView;
-    
-    private object: RenderObject;
-
-    // Resources
-    //colorBuffer: GPUBuffer;
-    private indexBuffer: GPUBuffer;
-    private vertModule: GPUShaderModule;
-    private fragModule: GPUShaderModule;
-    private pipeline: GPURenderPipeline;
-
-    private commandEncoder: GPUCommandEncoder;
-    private passEncoder: GPURenderPassEncoder;
-    // speed: Float32Array;
-    // position: Float32Array;
-    // color: Float32Array;
-    
-    constructor(canvas, binding, primitive) {
-        this.canvas = canvas;
-        this.binding = binding;
-        this.primitive = primitive;
-    }
-
-    // Start the rendering engine
-    async start() {
-        if (await this.initializeAPI()) {
-            this.resizeBackings();
-            await this.initializeResources();
-            this.render();
-        }
-    }
-
-    // Initialize 
-    async initializeAPI(): Promise<boolean> {
-        try {
-            // Entry to GPU
-            const entry: GPU = navigator.gpu;
-            if (!entry) {
-                return false;
-            }
-
-            // Physical Device Adapter
-            this.adapter = await entry.requestAdapter();
-
-            // Logical Device
-            this.device = await this.adapter.requestDevice();
-
-            // Queue
-            this.queue = this.device.queue;
-            this.object = new RenderObject(this.device);
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
-
-        return true;
-    }
-
-    // Initialize resources to render triangle (buffers, shaders, pipeline)
-    async initializeResources() {
-        // Buffers
-        const createBuffer = (
-            arr: Float32Array | Uint16Array,
-            usage: number
-        ) => {
-            // Align to 4 bytes (thanks @chrimsonite)
-            let desc = {
-                size: (arr.byteLength + 3) & ~3,
-                usage,
-                mappedAtCreation: true
-            };
-            let buffer = this.device.createBuffer(desc);
-            const writeArray =
-                arr instanceof Uint16Array
-                    ? new Uint16Array(buffer.getMappedRange())
-                    : new Float32Array(buffer.getMappedRange());
-            writeArray.set(arr);
-            buffer.unmap();
-            return buffer;
-        };
-
-        this.object.allocate();
-
-        let idxSize = (VERTEX_COUNT * 2 + 3) & ~3;
-        this.indexBuffer = await this.device.createBuffer({
-            size: idxSize,
-            usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
-        });
-
-        let offset = 0;
-        const indices = new Uint16Array(idxSize / 2); /* Divide because 2 Uint16Array */
-        for (let x = 0; x < VERTEX_COUNT; x++) {
-            indices[x] = x;
-        }
-        this.device.queue.writeBuffer(this.indexBuffer, 0, indices);
 
         // Shaders
         const vsmDesc = {
@@ -220,8 +82,6 @@ export default class Renderer {
             code: fragShaderCode
         };
         this.fragModule = this.device.createShaderModule(fsmDesc);
-
-        // Graphics Pipeline
 
         // Input Assembly
         const positionAttribDesc: GPUVertexAttribute = {
@@ -290,7 +150,149 @@ export default class Renderer {
             primitive,
             depthStencil
         };
-        this.pipeline = this.device.createRenderPipeline(pipelineDesc);
+        this.pipeline = this.device.createRenderPipeline(pipelineDesc);        
+    }
+
+    updatedata = () => {
+        let offset = 0;
+        for (let x = 0; x < VERTEX_COUNT / 3; x++) {
+            let aa = vec3.fromValues(Math.random() * 2.0 - 1.0, Math.random() * 2.0 - 1.0, 0);
+            this.position.set(aa, 3 * offset);
+            let bb = vec3.fromValues(Math.random(), Math.random(), Math.random());
+            this.color.set(bb, 3 * offset);
+            offset++;
+        }
+    }
+
+    updatePosition = () => {
+        let step = 0.001;
+        for (let x = 0; x < VERTEX_COUNT; x+=3) {
+            if ((this.position[x] > 1.0) || (this.position[x] < -1.0)) {
+                this.speed[x] = -this.speed[x];
+            }
+            
+            if ((this.position[x + 1] > 1.0) || (this.position[x + 1] < -1.0)) {
+                this.speed[x + 1] = -this.speed[x + 1];
+            }
+    
+            this.position[x] += this.speed[x];
+            this.position[x + 1] += this.speed[x + 1];
+        }
+    }
+}
+
+export default class Renderer {
+    private canvas: HTMLCanvasElement;
+    private binding: Binding;
+    private primitive: Number; // 0: point, 1: Line
+
+    // API Data Structures
+    private adapter: GPUAdapter;
+    private device: GPUDevice;
+    private queue: GPUQueue;
+
+    // Frame Backings
+    private context: GPUCanvasContext;
+    private colorTexture: GPUTexture;
+    private colorTextureView: GPUTextureView;
+    private depthTexture: GPUTexture;
+    private depthTextureView: GPUTextureView;
+    
+    private object: RenderObject;
+
+    // Resources
+    //colorBuffer: GPUBuffer;
+    private indexBuffer: GPUBuffer;
+    // private vertModule: GPUShaderModule;
+    // private fragModule: GPUShaderModule;
+    //private pipeline: GPURenderPipeline;
+
+    private commandEncoder: GPUCommandEncoder;
+    private passEncoder: GPURenderPassEncoder;
+    // speed: Float32Array;
+    // position: Float32Array;
+    // color: Float32Array;
+    
+    constructor(canvas, binding, primitive) {
+        this.canvas = canvas;
+        this.binding = binding;
+        this.primitive = primitive;
+    }
+
+    // Start the rendering engine
+    async start() {
+        if (await this.initializeAPI()) {
+            this.resizeBackings();
+            await this.initializeResources();
+            this.render();
+        }
+    }
+
+    // Initialize 
+    async initializeAPI(): Promise<boolean> {
+        try {
+            // Entry to GPU
+            const entry: GPU = navigator.gpu;
+            if (!entry) {
+                return false;
+            }
+
+            // Physical Device Adapter
+            this.adapter = await entry.requestAdapter();
+
+            // Logical Device
+            this.device = await this.adapter.requestDevice();
+
+            // Queue
+            this.queue = this.device.queue;
+            this.object = new RenderObject(this.device, this.primitive);
+        } catch (e) {
+            console.error(e);
+            return false;
+        }
+
+        return true;
+    }
+
+    // Initialize resources to render triangle (buffers, shaders, pipeline)
+    async initializeResources() {
+        // Buffers
+        const createBuffer = (
+            arr: Float32Array | Uint16Array,
+            usage: number
+        ) => {
+            // Align to 4 bytes (thanks @chrimsonite)
+            let desc = {
+                size: (arr.byteLength + 3) & ~3,
+                usage,
+                mappedAtCreation: true
+            };
+            let buffer = this.device.createBuffer(desc);
+            const writeArray =
+                arr instanceof Uint16Array
+                    ? new Uint16Array(buffer.getMappedRange())
+                    : new Float32Array(buffer.getMappedRange());
+            writeArray.set(arr);
+            buffer.unmap();
+            return buffer;
+        };
+
+        this.object.allocate();
+
+        let idxSize = (VERTEX_COUNT * 2 + 3) & ~3;
+        this.indexBuffer = await this.device.createBuffer({
+            size: idxSize,
+            usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
+        });
+
+        const indices = new Uint16Array(idxSize / 2); /* Divide because 2 Uint16Array */
+        for (let x = 0; x < VERTEX_COUNT; x++) {
+            indices[x] = x;
+        }
+        this.device.queue.writeBuffer(this.indexBuffer, 0, indices);
+
+        // Graphics Pipeline
+
     }
 
     // updatedata = () => {
@@ -371,7 +373,7 @@ export default class Renderer {
 
         // Encode drawing commands
         this.passEncoder = this.commandEncoder.beginRenderPass(renderPassDesc);
-        this.passEncoder.setPipeline(this.pipeline);
+        this.passEncoder.setPipeline(this.object.pipeline);
         this.passEncoder.setViewport(
             0,
             0,
