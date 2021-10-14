@@ -32,15 +32,15 @@ export default class Renderer {
         this.primitive = primitive;
     }
 
-    // Start the rendering engine
-    async start() {
-        if (await this.initializeAPI()) {
-            this.resizeBackings();
-            await this.initializeResources();
-            this.render();
-        }
-    }
-
+    // // Start the rendering engine
+    // async start() {
+    //     if (await this.initializeAPI()) {
+    //         this.resizeBackings();
+    //         await this.initializeResources();
+    //         this.render();
+    //     }
+    // }    
+    
     // Initialize 
     async initializeAPI(): Promise<boolean> {
         try {
@@ -60,6 +60,9 @@ export default class Renderer {
             this.queue = this.device.queue;
             this.scene = new Scene();
             this.scene.add(new RenderObject(this.device, this.primitive, this.binding));
+
+            this.resizeBackings();
+            await this.initializeResources();
         } catch (e) {
             console.error(e);
             return false;
@@ -156,8 +159,5 @@ export default class Renderer {
 
         this.passEncoder.endPass();
         this.queue.submit([this.commandEncoder.finish()]);
-
-        // Refresh canvas
-        requestAnimationFrame(this.render);
     };
 }
