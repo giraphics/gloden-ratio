@@ -1,15 +1,14 @@
 import Binding from '../binder/binding';
-import { RenderObject } from './objects';
 import { Scene } from './scene';
 
 export default class Renderer {
     private canvas: HTMLCanvasElement;
-    private binding: Binding;
-    private primitive: Number; // 0: point, 1: Line
+    public binding: Binding;
+    public primitive: Number; // 0: point, 1: Line
 
     // API Data Structures
     private adapter: GPUAdapter;
-    private device: GPUDevice;
+    public device: GPUDevice;
     private queue: GPUQueue;
 
     // Frame Backings
@@ -22,25 +21,12 @@ export default class Renderer {
     private commandEncoder: GPUCommandEncoder;
     private passEncoder: GPURenderPassEncoder;
 
-    // Render objects OR scene goes here
-    private object: RenderObject;
-    private scene: Scene;
-
     constructor(canvas: HTMLCanvasElement, binding: Binding, primitive: Number) {
         this.canvas = canvas;
         this.binding = binding;
         this.primitive = primitive;
     }
 
-    // // Start the rendering engine
-    // async start() {
-    //     if (await this.initializeAPI()) {
-    //         this.resizeBackings();
-    //         await this.initializeResources();
-    //         this.render();
-    //     }
-    // }    
-    
     // Initialize 
     async initializeAPI(): Promise<boolean> {
         try {
@@ -58,24 +44,14 @@ export default class Renderer {
 
             // Queue
             this.queue = this.device.queue;
-            this.scene = new Scene();
-            this.scene.add(new RenderObject(this.device, this.primitive, this.binding));
 
             this.resizeBackings();
-            await this.initializeResources();
         } catch (e) {
             console.error(e);
             return false;
         }
 
         return true;
-    }
-
-    // Initialize resources to render triangle (buffers, shaders, pipeline)
-    async initializeResources() {
-        for (let object of this.scene.getObjects()) {
-            object.allocate();
-        }
     }
 
     // Resize swapchain, frame buffer attachments
@@ -103,15 +79,13 @@ export default class Renderer {
         this.depthTextureView = this.depthTexture.createView();
     }
 
-    renderScene() {       
-        // Todo do it for each
-        //this.object.draw(this.passEncoder);
-        for (let object of this.scene.getObjects()) {
+    renderScene(scene: Scene) {       
+        for (let object of scene.getObjects()) {
             object.draw(this.passEncoder);
         }
     }
       
-    render = () => {
+    render = (scene: Scene) => {
         // Acquire next image from context
         this.colorTexture = this.context.getCurrentTexture();
         this.colorTextureView = this.colorTexture.createView();
@@ -155,7 +129,7 @@ export default class Renderer {
         );
  
         // Write and submit commands to queue
-        this.renderScene();
+        this.renderScene(scene);
 
         this.passEncoder.endPass();
         this.queue.submit([this.commandEncoder.finish()]);
