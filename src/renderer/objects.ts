@@ -3,6 +3,7 @@ import fragShaderCode from './shaders/triangle.frag.wgsl';
 import { mat4, vec3 } from 'gl-matrix';
 import Binding from '../binder/binding';
 import { Camera } from './camera';
+import UUID from './base/objid';
 
 const vertexShaderGLSL = `
 	#version 450
@@ -27,7 +28,7 @@ const fragmentShaderGLSL = `
 const VERTEX_COUNT = 500000;
 const ELEMENTS = 3;
 
-export class RenderObject {
+export class RenderObject extends UUID {
     private device: GPUDevice;
     private primitive: Number; // 0: point, 1: Line
     private binding: Binding;
@@ -52,7 +53,7 @@ export class RenderObject {
     private modelViewProjectionMatrix = mat4.create() as Float32Array;
 
     // Camera
-    private camera: Camera;
+    //private camera: Camera;
     // Model
     private rotX: number;
     private rotY: number;
@@ -63,6 +64,8 @@ export class RenderObject {
     private color: Float32Array;
 
     constructor(device: GPUDevice, primitive: Number, binding: Binding) {
+        super();
+        
         this.device = device;
         this.primitive = primitive;
         this.binding = binding;
@@ -110,8 +113,8 @@ export class RenderObject {
         this.initializeData();
 
         // camera
-        this.camera = new Camera(800.0 / 600.0);
-        this.camera.z = 2;
+        // this.camera = new Camera(800.0 / 600.0);
+        // this.camera.z = 2;
 
         // Shaders
         const vsmDesc = {
@@ -244,7 +247,7 @@ export class RenderObject {
         }
     }
 
-    draw = (passEncoder: GPURenderPassEncoder) => {
+    draw = (passEncoder: GPURenderPassEncoder, camera: Camera) => {
         this.update(); // Updathis.camerathis.camerathis.camerathis.camerate the position first
 
         passEncoder.setPipeline(this.pipeline);
@@ -260,7 +263,7 @@ export class RenderObject {
             this.rotY = 0.0;
 
         // PROJECT ON CAMERA
-        mat4.multiply(this.modelViewProjectionMatrix, this.camera.getCameraViewProjMatrix(), modelMatrix);
+        mat4.multiply(this.modelViewProjectionMatrix, camera.getCameraViewProjMatrix(), modelMatrix);
         
         this.device.queue.writeBuffer(
             this.uniformBuffer,

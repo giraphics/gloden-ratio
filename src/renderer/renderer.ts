@@ -1,5 +1,6 @@
 import Binding from '../binder/binding';
 import { Scene } from './scene';
+import { Camera } from './camera';
 
 export default class Renderer {
     private canvas: HTMLCanvasElement;
@@ -79,13 +80,13 @@ export default class Renderer {
         this.depthTextureView = this.depthTexture.createView();
     }
 
-    renderScene(scene: Scene) {       
+    renderScene(scene: Scene, camera: Camera) {       
         for (let object of scene.getObjects()) {
-            object.draw(this.passEncoder);
+            object.draw(this.passEncoder, camera);
         }
     }
       
-    render = (scene: Scene) => {
+    render = (scene: Scene, camera: Camera) => {
         // Acquire next image from context
         this.colorTexture = this.context.getCurrentTexture();
         this.colorTextureView = this.colorTexture.createView();
@@ -129,7 +130,7 @@ export default class Renderer {
         );
  
         // Write and submit commands to queue
-        this.renderScene(scene);
+        this.renderScene(scene, camera);
 
         this.passEncoder.endPass();
         this.queue.submit([this.commandEncoder.finish()]);
