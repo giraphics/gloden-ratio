@@ -254,13 +254,13 @@ export class RenderObject extends UUID {
 
         // MOVE / TRANSLATE OBJECT
         const modelMatrix = mat4.create();
-//        mat4.translate(modelMatrix, modelMatrix, vec3.fromValues(0, 0, -0.1));
-        mat4.rotateX(modelMatrix, modelMatrix, this.rotY);
-        mat4.rotateY(modelMatrix, modelMatrix, this.rotY);
-        mat4.rotateZ(modelMatrix, modelMatrix, this.rotY);
-        this.rotY += 0.01;
-        if (this.rotY > 3.14)
-            this.rotY = 0.0;
+        mat4.translate(modelMatrix, modelMatrix, vec3.fromValues(0, 0, -0.1));
+        // mat4.rotateX(modelMatrix, modelMatrix, this.rotY);
+        // mat4.rotateY(modelMatrix, modelMatrix, this.rotY);
+        // mat4.rotateZ(modelMatrix, modelMatrix, this.rotY);
+        // this.rotY += 0.01;
+        // if (this.rotY > 3.14)
+        //     this.rotY = 0.0;
 
         // PROJECT ON CAMERA
         mat4.multiply(this.modelViewProjectionMatrix, camera.getCameraViewProjMatrix(), modelMatrix);

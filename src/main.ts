@@ -7,12 +7,56 @@ import { Camera } from './renderer/camera';
 
 const binding = new Binding();
 const gui = new Gui(binding);
+let canvas: HTMLCanvasElement;
+let canvas2: HTMLCanvasElement;
+let camera: Camera;
+let camera2: Camera;
+
+var mouseHandling = function(canva: HTMLCanvasElement, cam: Camera){
+	// ZOOM
+    canva.onwheel = (event: WheelEvent) => {
+		cam.z += event.deltaY / 100
+	}
+
+	// MOUSE DRAG
+	var mouseDown = false;
+	canva.onmousedown = (event: MouseEvent) => {
+		mouseDown = true;
+
+		lastMouseX = event.pageX;
+		lastMouseY = event.pageY;
+	}
+	canva.onmouseup = (event: MouseEvent) => {
+		mouseDown = false;
+	}
+	var lastMouseX=-1; 
+	var lastMouseY=-1;
+	canva.onmousemove = (event: MouseEvent) => {
+		if (!mouseDown) {
+			return;
+		}
+
+		var mousex = event.pageX;
+		var mousey = event.pageY;
+
+		if (lastMouseX > 0 && lastMouseY > 0) {
+			const roty = mousex - lastMouseX;
+			const rotx = mousey - lastMouseY;
+
+			cam.rotY += roty / 100;
+			cam.rotX += rotx / 100;
+		}
+
+		lastMouseX = mousex;
+		lastMouseY = mousey;
+	}	
+}
 
 window.onload = function(){
 	// [Important] Let the GUI be executed first to create the canvas
 	gui.start(binding);
 
-	const canvas = document.getElementById('webgpu-canvas') as HTMLCanvasElement;
+	canvas = document.getElementById('webgpu-canvas') as HTMLCanvasElement;
 	const renderer = new Renderer(canvas, binding, 0);
 
 	renderer.initializeAPI().then((success) => {
@@ -22,7 +66,7 @@ window.onload = function(){
 		scene.add(new RenderObject(renderer.device, renderer.primitive, renderer.binding));
 	
 		// Camera
-		const camera = new Camera(canvas.width/ canvas.height);
+		camera = new Camera(canvas.width/ canvas.height);
         camera.z = 2;
 
 		const doFrame = () => {
@@ -32,46 +76,46 @@ window.onload = function(){
 		requestAnimationFrame(doFrame);
 	});
     
-	// // ZOOM
-    // canvas.onwheel = (event: WheelEvent) => {
-	// 	camera.z += event.deltaY / 100
-	// }
+	// ZOOM
+    canvas.onwheel = (event: WheelEvent) => {
+		camera.z += event.deltaY / 100
+	}
 
-	// // MOUSE DRAG
-	// var mouseDown = false;
-	// canvas.onmousedown = (event: MouseEvent) => {
-	// 	mouseDown = true;
+	// MOUSE DRAG
+	var mouseDown = false;
+	canvas.onmousedown = (event: MouseEvent) => {
+		mouseDown = true;
 
-	// 	lastMouseX = event.pageX;
-	// 	lastMouseY = event.pageY;
-	// }
-	// canvas.onmouseup = (event: MouseEvent) => {
-	// 	mouseDown = false;
-	// }
-	// var lastMouseX=-1; 
-	// var lastMouseY=-1;
-	// canvas.onmousemove = (event: MouseEvent) => {
-	// 	if (!mouseDown) {
-	// 		return;
-	// 	}
+		lastMouseX = event.pageX;
+		lastMouseY = event.pageY;
+	}
+	canvas.onmouseup = (event: MouseEvent) => {
+		mouseDown = false;
+	}
+	var lastMouseX=-1; 
+	var lastMouseY=-1;
+	canvas.onmousemove = (event: MouseEvent) => {
+		if (!mouseDown) {
+			return;
+		}
 
-	// 	var mousex = event.pageX;
-	// 	var mousey = event.pageY;
+		var mousex = event.pageX;
+		var mousey = event.pageY;
 
-	// 	if (lastMouseX > 0 && lastMouseY > 0) {
-	// 		const roty = mousex - lastMouseX;
-	// 		const rotx = mousey - lastMouseY;
+		if (lastMouseX > 0 && lastMouseY > 0) {
+			const roty = mousex - lastMouseX;
+			const rotx = mousey - lastMouseY;
 
-	// 		camera.rotY += roty / 100;
-	// 		camera.rotX += rotx / 100;
-	// 	}
+			camera.rotY += roty / 100;
+			camera.rotX += rotx / 100;
+		}
 
-	// 	lastMouseX = mousex;
-	// 	lastMouseY = mousey;
-	// }
-	/////////////////////////////////////////////////////////////////////
+		lastMouseX = mousex;
+		lastMouseY = mousey;
+	}
+	/////////////////////////////////////////////////////////////////
 	
-	const canvas2 = document.getElementById('webgpu-canvas2') as HTMLCanvasElement;
+	canvas2 = document.getElementById('webgpu-canvas2') as HTMLCanvasElement;
 	const renderer2 = new Renderer(canvas2, binding, 1);
 	renderer2.initializeAPI().then((success) => {
 		if (!success) return;
@@ -80,7 +124,7 @@ window.onload = function(){
 		scene2.add(new RenderObject(renderer2.device, renderer2.primitive, renderer2.binding));
 
 		// Camera
-		const camera2 = new Camera(canvas.width/ canvas.height);
+		camera2 = new Camera(canvas.width/ canvas.height);
         camera2.z = 12;
 	
 		const doFrame2 = () => {
@@ -89,5 +133,44 @@ window.onload = function(){
 		};
 		requestAnimationFrame(doFrame2);
 	});
+
+	// ZOOM
+    canvas2.onwheel = (event: WheelEvent) => {
+		camera2.z += event.deltaY / 100
+	}
+
+	// MOUSE DRAG
+	var mouseDown2 = false;
+	canvas2.onmousedown = (event: MouseEvent) => {
+		mouseDown2 = true;
+
+		lastMouseX2 = event.pageX;
+		lastMouseY2 = event.pageY;
+	}
+	canvas2.onmouseup = (event: MouseEvent) => {
+		mouseDown2 = false;
+	}
+	var lastMouseX2=-1; 
+	var lastMouseY2=-1;
+	canvas2.onmousemove = (event: MouseEvent) => {
+		if (!mouseDown2) {
+			return;
+		}
+
+		var mousex2 = event.pageX;
+		var mousey2 = event.pageY;
+
+		if (lastMouseX2 > 0 && lastMouseY2 > 0) {
+			const roty2 = mousex2 - lastMouseX2;
+			const rotx2 = mousey2 - lastMouseY2;
+
+			camera2.rotY += roty2 / 100;
+			camera2.rotX += rotx2 / 100;
+		}
+
+		lastMouseX2 = mousex2;
+		lastMouseY2 = mousey2;
+	}
+	///////////////////////////////////////////////////////////////////
 }
 
