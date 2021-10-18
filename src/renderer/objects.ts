@@ -25,7 +25,7 @@ const fragmentShaderGLSL = `
 `;
 
 // Index Buffer Data
-const VERTEX_COUNT = 500000;
+const VERTEX_COUNT = 1000000;
 const ELEMENTS = 3;
 
 export class RenderObject extends SceneGraph {
@@ -48,8 +48,6 @@ export class RenderObject extends SceneGraph {
     // - Host
     private modelViewProjectionMatrix = mat4.create() as Float32Array;
 
-    // Camera
-    //private camera: Camera;
     // Model
     private rotX: number;
     private rotY: number;
@@ -88,13 +86,11 @@ export class RenderObject extends SceneGraph {
         });
 
         this.speed = new Float32Array(VERTEX_COUNT * ELEMENTS);
-        let off = 0;
         for (let x = 0; x < VERTEX_COUNT; x++) {
             let aa = vec3.fromValues(Math.random() / 100.0, Math.random() / 100.0, Math.random() / 100.0);
-            this.speed.set(aa, 3 * off);
-            off++;
+            this.speed.set(aa, 3 * x);
         }
-//        let idxSize = (VERTEX_COUNT * 2 + 3) & ~3;
+
         //let idxSize = (VERTEX_COUNT * 4 + 3) & ~3;
         let idxSize = VERTEX_COUNT * 4;
         this.indexBuffer = /*await*/ this.device.createBuffer({
@@ -110,6 +106,7 @@ export class RenderObject extends SceneGraph {
         this.device.queue.writeBuffer(this.indexBuffer, 0, indices);
 
         this.initializeData();
+        this.device.queue.writeBuffer(this.colorBuffer, 0, this.color);
 
         // Shaders
         const vsmDesc = {
@@ -211,29 +208,27 @@ export class RenderObject extends SceneGraph {
     }
 
     initializeData = () => {
-        let offset = 0;
         for (let x = 0; x < VERTEX_COUNT; x++) {
 
             if (x < VERTEX_COUNT-100000){
                 let aa = vec3.fromValues(1.0, 1.0, 1.0);
-                this.position.set(aa, 3 * offset);
+                this.position.set(aa, 3 * x);
             }
             else {
                 let aa = vec3.fromValues(Math.random() * 2.0 - 1.0, Math.random() * 2.0 - 1.0, Math.random() * 2.0 - 1.0);
-                this.position.set(aa, 3 * offset);
+                this.position.set(aa, 3 * x);
             }
 
             let aa = vec3.fromValues(Math.random() * 2.0 - 1.0, Math.random() * 2.0 - 1.0, Math.random() * 2.0 - 1.0);
-            this.position.set(aa, 3 * offset);
+            this.position.set(aa, 3 * x);
 
             let bb = vec3.fromValues(Math.random(), Math.random(), Math.random());
-            this.color.set(bb, 3 * offset);
-            offset++;
+            this.color.set(bb, 3 * x);
         }
     }
 
     update = () => {
-        for (let x = 0; x < VERTEX_COUNT * ELEMENTS; x += ELEMENTS) {
+        for (let x = 0; x < this.binding.vextexCount * ELEMENTS; x += ELEMENTS) {
             if ((this.position[x] > 1.0) || (this.position[x] < -1.0)) {
                 this.speed[x] = -this.speed[x];
             }
@@ -279,8 +274,7 @@ export class RenderObject extends SceneGraph {
             this.modelViewProjectionMatrix.byteLength
         );
 
-        this.device.queue.writeBuffer(this.positionBuffer, 0, this.position);
-        this.device.queue.writeBuffer(this.colorBuffer, 0, this.color);
+        this.device.queue.writeBuffer(this.positionBuffer, 0, this.position, 0, this.binding.vextexCount * ELEMENTS);
         passEncoder.setVertexBuffer(0, this.positionBuffer);
         passEncoder.setVertexBuffer(1, this.colorBuffer);
         passEncoder.setIndexBuffer(this.indexBuffer, 'uint32');

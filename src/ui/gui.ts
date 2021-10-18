@@ -177,7 +177,7 @@ export default class Gui {
             console.log("Widget change: " + name + " -> " + value );
         };
         root.content.appendChild(widgets.root);
-        widgets.addSlider("Vertex count",15,{min:1,max:500000,step:1, empadding: "10", callback: function(x : number) { binding.vextexCount = Math.floor(x);; }});
+        widgets.addSlider("Vertex count",15,{min:1,max:1000000,step:1, empadding: "10", callback: function(x : number) { binding.vextexCount = Math.floor(x);; }});
         widgets.addSeparator();
         widgets.addVector2("vector2",[10,20], {min:0});
         widgets.addVector3("vector3",[10,20,30], {min:0});
