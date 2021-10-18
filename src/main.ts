@@ -4,6 +4,7 @@ import Binding from './binder/binding';
 import { RenderObject } from './renderer/objects';
 import { Scene } from './renderer/scene';
 import { Camera } from './renderer/camera';
+import { CubeObject } from './renderer/cube';
 
 const binding = new Binding();
 const gui = new Gui(binding);
@@ -121,7 +122,7 @@ window.onload = function(){
 		if (!success) return;
 
 		const scene2 = new Scene();
-		scene2.add(new RenderObject(renderer2.device, renderer2.primitive, renderer2.binding));
+		scene2.add(new CubeObject(renderer2.device, renderer2.primitive, renderer2.binding));
 
 		// Camera
 		camera2 = new Camera(canvas.width/ canvas.height);
