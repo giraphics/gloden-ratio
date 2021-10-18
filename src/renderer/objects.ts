@@ -3,7 +3,7 @@ import fragShaderCode from './shaders/triangle.frag.wgsl';
 import { mat4, vec3 } from 'gl-matrix';
 import Binding from '../binder/binding';
 import { Camera } from './camera';
-import UUID from './base/objid';
+import SceneGraph from './base/scenegraph';
 
 const vertexShaderGLSL = `
 	#version 450
@@ -28,8 +28,7 @@ const fragmentShaderGLSL = `
 const VERTEX_COUNT = 500000;
 const ELEMENTS = 3;
 
-export class RenderObject extends UUID {
-    private device: GPUDevice;
+export class RenderObject extends SceneGraph {
     private primitive: Number; // 0: point, 1: Line
     private binding: Binding;
 
@@ -37,9 +36,6 @@ export class RenderObject extends UUID {
     private positionBuffer: GPUBuffer;
     private colorBuffer: GPUBuffer;
     private indexBuffer: GPUBuffer;
-    private vertModule: GPUShaderModule;
-    private fragModule: GPUShaderModule;
-    private pipeline: GPURenderPipeline;
 
     // Uniforms 
     // - Device 
@@ -111,10 +107,6 @@ export class RenderObject extends UUID {
         this.device.queue.writeBuffer(this.indexBuffer, 0, indices);
 
         this.initializeData();
-
-        // camera
-        // this.camera = new Camera(800.0 / 600.0);
-        // this.camera.z = 2;
 
         // Shaders
         const vsmDesc = {

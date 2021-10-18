@@ -1,19 +1,15 @@
-import Renderer from './renderer/renderer';
 import Gui from './ui/gui';
 import Binding from './binder/binding';
-import { RenderObject } from './renderer/objects';
-import { Scene } from './renderer/scene';
-import { Camera } from './renderer/camera';
-import { CubeObject } from './renderer/cube';
+import * as GoldenRatio from "./renderer/index";
 
 const binding = new Binding();
 const gui = new Gui(binding);
 let canvas: HTMLCanvasElement;
 let canvas2: HTMLCanvasElement;
-let camera: Camera;
-let camera2: Camera;
+let camera: GoldenRatio.Camera;
+let camera2: GoldenRatio.Camera;
 
-var mouseHandling = function(canva: HTMLCanvasElement, cam: Camera){
+var mouseHandling = function(canva: HTMLCanvasElement, cam: GoldenRatio.Camera){
 	// ZOOM
     canva.onwheel = (event: WheelEvent) => {
 		cam.z += event.deltaY / 100
@@ -58,16 +54,16 @@ window.onload = function(){
 	gui.start(binding);
 
 	canvas = document.getElementById('webgpu-canvas') as HTMLCanvasElement;
-	const renderer = new Renderer(canvas, binding, 0);
+	const renderer = new GoldenRatio.Renderer(canvas, binding, 0);
 
 	renderer.initializeAPI().then((success) => {
 		if (!success) return;
 
-		const scene = new Scene();
-		scene.add(new RenderObject(renderer.device, renderer.primitive, renderer.binding));
+		const scene = new GoldenRatio.Scene();
+		scene.add(new GoldenRatio.RenderObject(renderer.device, renderer.primitive, renderer.binding));
 	
 		// Camera
-		camera = new Camera(canvas.width/ canvas.height);
+		camera = new GoldenRatio.Camera(canvas.width/ canvas.height);
         camera.z = 2;
 
 		const doFrame = () => {
@@ -117,15 +113,15 @@ window.onload = function(){
 	/////////////////////////////////////////////////////////////////
 	
 	canvas2 = document.getElementById('webgpu-canvas2') as HTMLCanvasElement;
-	const renderer2 = new Renderer(canvas2, binding, 1);
+	const renderer2 = new GoldenRatio.Renderer(canvas2, binding, 1);
 	renderer2.initializeAPI().then((success) => {
 		if (!success) return;
 
-		const scene2 = new Scene();
-		scene2.add(new CubeObject(renderer2.device, renderer2.primitive, renderer2.binding));
+		const scene2 = new GoldenRatio.Scene();
+		scene2.add(new GoldenRatio.CubeObject(renderer2.device, renderer2.primitive, renderer2.binding));
 
 		// Camera
-		camera2 = new Camera(canvas.width/ canvas.height);
+		camera2 = new GoldenRatio.Camera(canvas.width/ canvas.height);
         camera2.z = 12;
 	
 		const doFrame2 = () => {

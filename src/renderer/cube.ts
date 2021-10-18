@@ -3,10 +3,8 @@ import fragShaderCode from './shaders/cube.frag.wgsl';
 import { mat4, vec3 } from 'gl-matrix';
 import Binding from '../binder/binding';
 import { Camera } from './camera';
-import UUID from './base/objid';
-
-// Index Buffer Data
-const ELEMENTS = 10; // Vertex(4), Color(4), UV(2)
+//import UUID from './base/objid';
+import SceneGraph from './base/scenegraph';
 
 export const cubeVertexCount = 36;
 
@@ -68,19 +66,16 @@ export const cubeIndexArray = new Uint16Array([
 
 const posOffset = 0;
 const colOffset = 4 * 4;
+const ELEMENTS = 10; // Vertex(4), Color(4), UV(2)
 const vertexSize = 4 * ELEMENTS;
 
-export class CubeObject extends UUID {
-    private device: GPUDevice;
+export class CubeObject extends SceneGraph {
     private primitive: Number; // 0: point, 1: Line
     private binding: Binding;
 
     // Resources
     private geometryBuffer: GPUBuffer;
     private indexBuffer: GPUBuffer;
-    private vertModule: GPUShaderModule;
-    private fragModule: GPUShaderModule;
-    private pipeline: GPURenderPipeline;
 
     // Uniforms 
     // - Device 

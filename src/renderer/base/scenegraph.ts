@@ -1,6 +1,6 @@
-import UUID from './objid';
+import BaseShape from './baseshape';
 
-export default class SceneGraph extends UUID {
+export default class SceneGraph extends BaseShape {
     constructor() {
         super();
     }

@@ -1,8 +1,9 @@
 import Binding from '../binder/binding';
 import { Scene } from './scene';
 import { Camera } from './camera';
+import {RenderObject} from './objects'
 
-export default class Renderer {
+export class Renderer {
     private canvas: HTMLCanvasElement;
     public binding: Binding;
     public primitive: Number; // 0: point, 1: Line
