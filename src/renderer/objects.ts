@@ -89,18 +89,21 @@ export class RenderObject extends SceneGraph {
 
         this.speed = new Float32Array(VERTEX_COUNT * ELEMENTS);
         let off = 0;
-        for (let x = 0; x < VERTEX_COUNT / 3; x++) {
+        for (let x = 0; x < VERTEX_COUNT; x++) {
             let aa = vec3.fromValues(Math.random() / 100.0, Math.random() / 100.0, Math.random() / 100.0);
             this.speed.set(aa, 3 * off);
             off++;
         }
-        let idxSize = (VERTEX_COUNT * 2 + 3) & ~3;
+//        let idxSize = (VERTEX_COUNT * 2 + 3) & ~3;
+        //let idxSize = (VERTEX_COUNT * 4 + 3) & ~3;
+        let idxSize = VERTEX_COUNT * 4;
         this.indexBuffer = /*await*/ this.device.createBuffer({
             size: idxSize,
             usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
         });
 
-        const indices = new Uint16Array(idxSize / 2); /* Divide because 2 Uint16Array */
+        // const indices = new Uint16Array(idxSize / 2); /* Divide because 2 Uint16Array */
+        const indices = new Uint32Array(VERTEX_COUNT); /* Divide because 2 Uint16Array */
         for (let x = 0; x < VERTEX_COUNT; x++) {
             indices[x] = x;
         }
@@ -209,9 +212,20 @@ export class RenderObject extends SceneGraph {
 
     initializeData = () => {
         let offset = 0;
-        for (let x = 0; x < VERTEX_COUNT / 3; x++) {
+        for (let x = 0; x < VERTEX_COUNT; x++) {
+
+            if (x < VERTEX_COUNT-100000){
+                let aa = vec3.fromValues(1.0, 1.0, 1.0);
+                this.position.set(aa, 3 * offset);
+            }
+            else {
+                let aa = vec3.fromValues(Math.random() * 2.0 - 1.0, Math.random() * 2.0 - 1.0, Math.random() * 2.0 - 1.0);
+                this.position.set(aa, 3 * offset);
+            }
+
             let aa = vec3.fromValues(Math.random() * 2.0 - 1.0, Math.random() * 2.0 - 1.0, Math.random() * 2.0 - 1.0);
             this.position.set(aa, 3 * offset);
+
             let bb = vec3.fromValues(Math.random(), Math.random(), Math.random());
             this.color.set(bb, 3 * offset);
             offset++;
@@ -219,8 +233,7 @@ export class RenderObject extends SceneGraph {
     }
 
     update = () => {
-        let step = 0.001;
-        for (let x = 0; x < VERTEX_COUNT; x+=3) {
+        for (let x = 0; x < VERTEX_COUNT * ELEMENTS; x += ELEMENTS) {
             if ((this.position[x] > 1.0) || (this.position[x] < -1.0)) {
                 this.speed[x] = -this.speed[x];
             }
@@ -239,7 +252,8 @@ export class RenderObject extends SceneGraph {
         }
     }
 
-    draw = (passEncoder: GPURenderPassEncoder, camera: Camera) => {
+    // draw = (passEncoder: GPURenderPassEncoder, camera: Camera) => {
+    public draw(passEncoder: GPURenderPassEncoder, camera: Camera): void {
         this.update(); // Updathis.camerathis.camerathis.camerathis.camerate the position first
 
         passEncoder.setPipeline(this.pipeline);
@@ -269,7 +283,7 @@ export class RenderObject extends SceneGraph {
         this.device.queue.writeBuffer(this.colorBuffer, 0, this.color);
         passEncoder.setVertexBuffer(0, this.positionBuffer);
         passEncoder.setVertexBuffer(1, this.colorBuffer);
-        passEncoder.setIndexBuffer(this.indexBuffer, 'uint16');
+        passEncoder.setIndexBuffer(this.indexBuffer, 'uint32');
         passEncoder.setBindGroup(0, this.uniformBindGroup);
         passEncoder.drawIndexed(this.binding.vextexCount, 1);
     }

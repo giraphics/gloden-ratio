@@ -219,7 +219,8 @@ export class CubeObject extends SceneGraph {
         });
     }
 
-    draw = (passEncoder: GPURenderPassEncoder, camera: Camera) => {
+    public draw(passEncoder: GPURenderPassEncoder, camera: Camera): void {
+        // draw = (passEncoder: GPURenderPassEncoder, camera: Camera) => {
         passEncoder.setPipeline(this.pipeline);
 
         // MOVE / TRANSLATE OBJECT

@@ -1,14 +1,16 @@
 //import { RenderObject } from './objects';
-import UUID from './base/objid';
+//import UUID from './base/objid';
+import BaseShape from './base/baseshape';
+
 export class Scene {
 
-    private objects: UUID[] = [];
+    private objects: BaseShape[] = [];
 
-    public add (object: UUID) {
+    public add (object: BaseShape) {
         this.objects.push(object);
     }
 
-    public getObjects () : UUID[] {
+    public getObjects () : BaseShape[] {
         return this.objects;
     }
 }

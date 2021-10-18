@@ -1,5 +1,6 @@
 
 let _UUID: number = 1;
+
 export default class UUID {
     id: number;
 
