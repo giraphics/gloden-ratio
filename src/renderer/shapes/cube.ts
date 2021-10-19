@@ -2,7 +2,7 @@ import vertShaderCode from './shaders/cube.vert.wgsl';
 import fragShaderCode from './shaders/cube.frag.wgsl';
 import { mat4, vec3 } from 'gl-matrix';
 import Binding from '../../binder/binding';
-import { Camera } from './../camera';
+import { Camera } from './../renderer/camera';
 import SceneGraph from './../base/scenegraph';
 
 export const cubeVertexCount = 36;
