@@ -60,7 +60,7 @@ window.onload = function(){
 		if (!success) return;
 
 		const scene = new GoldenRatio.Scene();
-		scene.add(new GoldenRatio.RenderObject(renderer.device, renderer.primitive, renderer.binding));
+		scene.add(new GoldenRatio.Particles(renderer.device, renderer.primitive, renderer.binding));
 	
 		// Camera
 		camera = new GoldenRatio.Camera(canvas.width/ canvas.height);

@@ -1,7 +1,6 @@
 import Binding from '../binder/binding';
 import { Scene } from './scene';
 import { Camera } from './camera';
-import {RenderObject} from './objects'
 
 export class Renderer {
     private canvas: HTMLCanvasElement;

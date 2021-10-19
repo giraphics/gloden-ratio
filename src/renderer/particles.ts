@@ -28,7 +28,7 @@ const fragmentShaderGLSL = `
 const VERTEX_COUNT = 1000000;
 const ELEMENTS = 3;
 
-export class RenderObject extends SceneGraph {
+export class Particles extends SceneGraph {
     private primitive: Number; // 0: point, 1: Line
     private binding: Binding;
 
