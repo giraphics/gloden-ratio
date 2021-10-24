@@ -64,12 +64,38 @@ let createCustomGeometry: (renderer2: GoldenRatio.Renderer) => GoldenRatio.Custo
 
 	let geometryIndexArray = new Uint16Array([
 		0, 1, 2, 2, 1, 3, 0xFFFF,
-		4, 5, 6, 6, 5, 7,
-		0xFFFF,0xFFFF,0xFFFF,
+		4, 5, 6, 6, 5, 7, 0xFFFF,
+		0xFFFF, 0xFFFF,
 	 ]);
 	
-	const customGeom = new GoldenRatio.CustomGeometry(renderer2.device, renderer2.primitive, renderer2.binding);
+	const customGeom = new GoldenRatio.CustomGeometry(renderer2.device, 1, GoldenRatio.PRIMITIVE_TYPE.TRIANGLE_STRIP, true);
 	customGeom.allocate(geometryVertexArray, geometryIndexArray);
+	return customGeom;
+};
+
+let createCustomGeometry1: (renderer2: GoldenRatio.Renderer) => GoldenRatio.CustomGeometry = function (renderer2: GoldenRatio.Renderer): GoldenRatio.CustomGeometry {
+	let geometryVertexArray = new Float32Array([
+		// float4 position, float4 color, float2 uv,
+		-1, -1, -1, 1,   1, 0, 1, 1,  1, 1, // -> 0
+		-1, -1, 1, 1,  0, 0, 1, 1,  0, 1, // -> 1
+		1, -1, -1, 1, 0, 0, 0, 1,  0, 0, // -> 2
+		// 1, -1, 1, 1,  1, 0, 0, 1,  1, 0, // -> 3
+		// -1, 1, -1, 1,   1, 0, 1, 1,  1, 1,  // -> 4
+		// -1, 1, 1, 1,  0, 0, 1, 1,  0, 1,  // -> 5
+		// 1, 1, -1, 1, 0, 0, 0, 1,  0, 0,  // -> 6
+		// 1, 1, 1, 1,  1, 0, 0, 1,  1, 0,  // -> 7
+	]);
+
+	let geometryIndexArray = new Uint16Array([
+		0, 1, 2, 2, 1, 3, 0xFFFF,
+		4, 5, 6, 6, 5, 7, 0xFFFF,
+		0xFFFF, 0xFFFF,
+	 ]);
+	
+	// const customGeom = new GoldenRatio.CustomGeometry(renderer2.device, 1, GoldenRatio.PRIMITIVE_TYPE.TRIANGLE_STRIP);
+//	customGeom.allocate(geometryVertexArray, geometryIndexArray);
+	const customGeom = new GoldenRatio.CustomGeometry(renderer2.device, 1, GoldenRatio.PRIMITIVE_TYPE.TRIANGLE_LIST, false);
+	customGeom.allocate(geometryVertexArray);
 	return customGeom;
 };
 
@@ -84,7 +110,7 @@ window.onload = function(){
 		if (!success) return;
 
 		const scene = new GoldenRatio.Scene();
-		scene.add(new GoldenRatio.Particles(renderer.device, renderer.primitive, renderer.binding));
+		scene.add(new GoldenRatio.Particles(renderer.device, renderer.primitive, renderer.binding, GoldenRatio.PRIMITIVE_TYPE.POINT_LIST));
 	
 		// Camera
 		camera = new GoldenRatio.Camera(canvas.width/ canvas.height);
@@ -142,7 +168,7 @@ window.onload = function(){
 		if (!success) return;
 
 		const scene2 = new GoldenRatio.Scene();
-		scene2.add(createCustomGeometry(renderer2));
+		scene2.add(createCustomGeometry1(renderer2));
 
 		// Camera
 		camera2 = new GoldenRatio.Camera(canvas.width/ canvas.height);

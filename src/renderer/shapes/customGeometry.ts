@@ -1,33 +1,12 @@
 import vertShaderCode from './shaders/cube.vert.wgsl';
 import fragShaderCode from './shaders/cube.frag.wgsl';
 import { mat4, vec3 } from 'gl-matrix';
-import Binding from '../../binder/binding';
+//import Binding from '../../binder/binding';
 import { Camera } from './../renderer/camera';
 import SceneGraph from './../base/scenegraph';
+import {PRIMITIVE_TYPE} from './../renderer/constants';
 
-export const geometryVertexCount = 8;
-
-// // prettier-ignore
-// export const geometryVertexArray = new Float32Array([
-//     // float4 position, float4 color, float2 uv,
-//     1, -1, 1, 1,   1, 0, 1, 1,  1, 1, 0
-//     -1, -1, 1, 1,  0, 0, 1, 1,  0, 1, 1
-//     -1, -1, -1, 1, 0, 0, 0, 1,  0, 0, 2
-//     1, -1, -1, 1,  1, 0, 0, 1,  1, 0, 3
-//     1, -1, 1, 1,   1, 0, 1, 1,  1, 1, 0
-//     -1, -1, -1, 1, 0, 0, 0, 1,  0, 0, 2
-// ]);
-// export const geometryVertexArray = new Float32Array([
-//     // float4 position, float4 color, float2 uv,
-//     1, -1, 1, 1,   1, 0, 1, 1,  1, 1, // -> 0
-//     -1, -1, 1, 1,  0, 0, 1, 1,  0, 1, // -> 1
-//     -1, -1, -1, 1, 0, 0, 0, 1,  0, 0, // -> 2
-//     1, -1, -1, 1,  1, 0, 0, 1,  1, 0, // -> 3
-//     1, 1, 1, 1,   1, 0, 1, 1,  1, 1,  // -> 4
-//     -1, 1, 1, 1,  0, 0, 1, 1,  0, 1,  // -> 5
-//     -1, 1, -1, 1, 0, 0, 0, 1,  0, 0,  // -> 6
-//     1, 1, -1, 1,  1, 0, 0, 1,  1, 0,  // -> 7
-// ]);
+//export const geometryVertexCount = 8;
 
 // https://en.wikipedia.org/wiki/Triangle_strip
 export const geometry1 = new Float32Array([
@@ -45,8 +24,6 @@ export const geometry2 = new Float32Array([
     1, -1, -1, 1, 0, 0, 0, 1,  0, 0, // -> 2
     1, -1, 1, 1,  1, 0, 0, 1,  1, 0, // -> 3
 ]);
-
-var geometryIndexCount = 16;
  
 const posOffset = 0;
 const colOffset = 4 * 4;
@@ -54,14 +31,14 @@ const ELEMENTS = 10; // Vertex(4), Color(4), UV(2)
 const vertexSize = 4 * ELEMENTS;
 
 export class CustomGeometry extends SceneGraph {
-    private primitive: Number; // 0: point, 1: Line
-    private binding: Binding;
-    //private geometryVertexArray: Number;
+    private isIndexedGeometry: boolean = false;
+    private geometryIndexCount: number = 16;
+    private geometryVertexCount: number = 16;
 
     // Resources
     private geometryBuffer: GPUBuffer;
     private indexBuffer: GPUBuffer;
-
+    
     // Uniforms 
     // - Device 
     private matrixSize = 4 * 16; // 4x4 matrix
@@ -78,22 +55,24 @@ export class CustomGeometry extends SceneGraph {
     private rotY: number;
     private rotZ: number;
 
-    constructor(device: GPUDevice, primitive: Number, binding: Binding) {
-        super();
+    constructor(device: GPUDevice, primitive: Number, primitiveType: PRIMITIVE_TYPE, isIndexedGeometry: boolean) {
+        super(primitiveType);
         
         this.device = device;
-        this.primitive = primitive;
-        this.binding = binding;
+        this.isIndexedGeometry = isIndexedGeometry;
 
         this.rotX = 0.0;
         this.rotY = 0.0;
         this.rotZ = 0.0;
+
+        this.initialize();
     }
 
-    public allocate(geometryVertexArray: Float32Array, geometryIndexArray: Uint16Array)
+    public allocate(geometryVertexArray: Float32Array, geometryIndexArray?: Uint16Array)
     {
+        this.geometryVertexCount = geometryVertexArray.length;
         this.geometryBuffer = this.device.createBuffer({
-            size: geometryVertexCount * ELEMENTS * 4,
+            size: this.geometryVertexCount * ELEMENTS * 4,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
         });
         this.device.queue.writeBuffer(this.geometryBuffer, 0, geometryVertexArray);
@@ -102,14 +81,23 @@ export class CustomGeometry extends SceneGraph {
         geometryVertexArray = null;
         console.log(geometryVertexArray);
 
-        let idxSize = (geometryIndexCount * 2 + 3) & ~3;
-        this.indexBuffer = this.device.createBuffer({
-            size: idxSize,
-            usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
-        });
+        if (geometryIndexArray) {
+            if (!this.isIndexedGeometry) {
+                console.log("Custom Geometry class is not expecting index buffer however it is provided with.");
+            }
+            this.geometryIndexCount = geometryIndexArray.length;
+            let idxSize = (this.geometryIndexCount * 2 + 3) & ~3;
+            this.indexBuffer = this.device.createBuffer({
+                size: idxSize,
+                usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
+            });
 
-        this.device.queue.writeBuffer(this.indexBuffer, 0, geometryIndexArray);
+            this.device.queue.writeBuffer(this.indexBuffer, 0, geometryIndexArray);
+        }
+    }
 
+    public initialize()
+    {
         // Shaders
         const vsmDesc = {
             code: vertShaderCode
@@ -170,11 +158,16 @@ export class CustomGeometry extends SceneGraph {
         };
 
         // Rasterization
-        const primitive: GPUPrimitiveState = {
+        const primitive: GPUPrimitiveState = this.isIndexedGeometry ? {
             frontFace: 'cw',
             cullMode: 'none',
-            topology: 'triangle-strip',
+            topology: this.primitiveType,
             stripIndexFormat: 'uint16',  // Parminder: for triangle string this field is must
+        }:
+        {
+            frontFace: 'cw',
+            cullMode: 'none',
+            topology: this.primitiveType,
         };
 
         const pipelineDesc: GPURenderPipelineDescriptor = {
@@ -233,8 +226,15 @@ export class CustomGeometry extends SceneGraph {
         );
 
         passEncoder.setVertexBuffer(0, this.geometryBuffer);
-        passEncoder.setIndexBuffer(this.indexBuffer, 'uint16');
         passEncoder.setBindGroup(0, this.uniformBindGroup);
-        passEncoder.drawIndexed(geometryIndexCount, 1);
+        if (this.isIndexedGeometry)
+        {
+            passEncoder.setIndexBuffer(this.indexBuffer, 'uint16');
+            passEncoder.drawIndexed(this.geometryIndexCount, 1);
+        }
+        else
+        {
+            passEncoder.draw(this.geometryVertexCount, 1, 0, 0);
+        }
     }
 }

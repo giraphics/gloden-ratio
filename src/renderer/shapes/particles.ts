@@ -4,6 +4,7 @@ import { mat4, vec3 } from 'gl-matrix';
 import Binding from '../../binder/binding';
 import { Camera } from './../renderer/camera';
 import SceneGraph from './../base/scenegraph';
+import {PRIMITIVE_TYPE} from './../renderer/constants';
 
 const vertexShaderGLSL = `
 	#version 450
@@ -57,8 +58,8 @@ export class Particles extends SceneGraph {
     private position: Float32Array;
     private color: Float32Array;
 
-    constructor(device: GPUDevice, primitive: Number, binding: Binding) {
-        super();
+    constructor(device: GPUDevice, primitive: Number, binding: Binding, primitiveType: PRIMITIVE_TYPE) {
+        super(primitiveType);
         
         this.device = device;
         this.primitive = primitive;

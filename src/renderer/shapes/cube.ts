@@ -4,6 +4,7 @@ import { mat4, vec3 } from 'gl-matrix';
 import Binding from '../../binder/binding';
 import { Camera } from './../renderer/camera';
 import SceneGraph from './../base/scenegraph';
+import {PRIMITIVE_TYPE} from './../renderer/constants';
 
 export const cubeVertexCount = 36;
 
@@ -92,8 +93,8 @@ export class CubeObject extends SceneGraph {
     private rotY: number;
     private rotZ: number;
 
-    constructor(device: GPUDevice, primitive: Number, binding: Binding) {
-        super();
+    constructor(device: GPUDevice, primitive: Number, binding: Binding, primitiveType: PRIMITIVE_TYPE) {
+        super(primitiveType);
         
         this.device = device;
         this.primitive = primitive;
