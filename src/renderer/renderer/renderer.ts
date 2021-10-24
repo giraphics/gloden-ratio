@@ -1,4 +1,4 @@
-import Binding from '../binder/binding';
+import Binding from '../../binder/binding';
 import { Scene } from './scene';
 import { Camera } from './camera';
 
@@ -93,7 +93,7 @@ export class Renderer {
 
         let colorAttachment: GPURenderPassColorAttachment = {
             view: this.colorTextureView,
-            loadValue: { r: 0, g: 0, b: 0, a: 1 },
+            loadValue: { r: 0.2, g: 0.2, b: 0.2, a: 1.0 },
             storeOp: 'store'
         };
 

@@ -49,6 +49,30 @@ var mouseHandling = function(canva: HTMLCanvasElement, cam: GoldenRatio.Camera){
 	}	
 }
 
+let createCustomGeometry: (renderer2: GoldenRatio.Renderer) => GoldenRatio.CustomGeometry = function (renderer2: GoldenRatio.Renderer): GoldenRatio.CustomGeometry {
+	let geometryVertexArray = new Float32Array([
+		// float4 position, float4 color, float2 uv,
+		-1, -1, -1, 1,   1, 0, 1, 1,  1, 1, // -> 0
+		-1, -1, 1, 1,  0, 0, 1, 1,  0, 1, // -> 1
+		1, -1, -1, 1, 0, 0, 0, 1,  0, 0, // -> 2
+		1, -1, 1, 1,  1, 0, 0, 1,  1, 0, // -> 3
+		-1, 1, -1, 1,   1, 0, 1, 1,  1, 1,  // -> 4
+		-1, 1, 1, 1,  0, 0, 1, 1,  0, 1,  // -> 5
+		1, 1, -1, 1, 0, 0, 0, 1,  0, 0,  // -> 6
+		1, 1, 1, 1,  1, 0, 0, 1,  1, 0,  // -> 7
+	]);
+
+	let geometryIndexArray = new Uint16Array([
+		0, 1, 2, 2, 1, 3, 0xFFFF,
+		4, 5, 6, 6, 5, 7,
+		0xFFFF,0xFFFF,0xFFFF,
+	 ]);
+	
+	const customGeom = new GoldenRatio.CustomGeometry(renderer2.device, renderer2.primitive, renderer2.binding);
+	customGeom.allocate(geometryVertexArray, geometryIndexArray);
+	return customGeom;
+};
+
 window.onload = function(){
 	// [Important] Let the GUI be executed first to create the canvas
 	gui.start(binding);
@@ -118,7 +142,7 @@ window.onload = function(){
 		if (!success) return;
 
 		const scene2 = new GoldenRatio.Scene();
-		scene2.add(new GoldenRatio.CubeObject(renderer2.device, renderer2.primitive, renderer2.binding));
+		scene2.add(createCustomGeometry(renderer2));
 
 		// Camera
 		camera2 = new GoldenRatio.Camera(canvas.width/ canvas.height);
