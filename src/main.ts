@@ -53,21 +53,21 @@ let createCustomGeometry: (renderer2: GoldenRatio.Renderer) => GoldenRatio.Custo
 	let geometryVertexArray = new Float32Array([
 		// float4 position, float4 color, float2 uv,
 		-1, -1, -1, 1,   1, 0, 1, 1,  1, 1, // -> 0
-		-1, -1, 1, 1,  0, 0, 1, 1,  0, 1, // -> 1
-		1, -1, -1, 1, 0, 0, 0, 1,  0, 0, // -> 2
-		1, -1, 1, 1,  1, 0, 0, 1,  1, 0, // -> 3
+		-1, -1, 1, 1,  0, 0, 1, 1,  0, 1,   // -> 1
+		1, -1, -1, 1, 0, 0, 0, 1,  0, 0,    // -> 2
+		1, -1, 1, 1,  1, 0, 0, 1,  1, 0,    // -> 3
 		-1, 1, -1, 1,   1, 0, 1, 1,  1, 1,  // -> 4
-		-1, 1, 1, 1,  0, 0, 1, 1,  0, 1,  // -> 5
-		1, 1, -1, 1, 0, 0, 0, 1,  0, 0,  // -> 6
-		1, 1, 1, 1,  1, 0, 0, 1,  1, 0,  // -> 7
+		-1, 1, 1, 1,  0, 0, 1, 1,  0, 1,    // -> 5
+		1, 1, -1, 1, 0, 0, 0, 1,  0, 0,     // -> 6
+		1, 1, 1, 1,  1, 0, 0, 1,  1, 0,     // -> 7
 	]);
 
+	// For Index its must be a strip
 	let geometryIndexArray = new Uint16Array([
 		0, 1, 2, 2, 1, 3, 0xFFFF,
 		4, 5, 6, 6, 5, 7, 0xFFFF,
 		0xFFFF, 0xFFFF,
 	 ]);
-	
 	const customGeom = new GoldenRatio.CustomGeometry(renderer2.device, 1, GoldenRatio.PRIMITIVE_TYPE.TRIANGLE_STRIP, true);
 	customGeom.allocate(geometryVertexArray, geometryIndexArray);
 	return customGeom;
@@ -76,26 +76,38 @@ let createCustomGeometry: (renderer2: GoldenRatio.Renderer) => GoldenRatio.Custo
 let createCustomGeometry1: (renderer2: GoldenRatio.Renderer) => GoldenRatio.CustomGeometry = function (renderer2: GoldenRatio.Renderer): GoldenRatio.CustomGeometry {
 	let geometryVertexArray = new Float32Array([
 		// float4 position, float4 color, float2 uv,
-		-1, -1, -1, 1,   1, 0, 1, 1,  1, 1, // -> 0
-		-1, -1, 1, 1,  0, 0, 1, 1,  0, 1, // -> 1
-		1, -1, -1, 1, 0, 0, 0, 1,  0, 0, // -> 2
-		// 1, -1, 1, 1,  1, 0, 0, 1,  1, 0, // -> 3
-		// -1, 1, -1, 1,   1, 0, 1, 1,  1, 1,  // -> 4
-		// -1, 1, 1, 1,  0, 0, 1, 1,  0, 1,  // -> 5
-		// 1, 1, -1, 1, 0, 0, 0, 1,  0, 0,  // -> 6
-		// 1, 1, 1, 1,  1, 0, 0, 1,  1, 0,  // -> 7
+		-1, -1, -1, 1, 1, 0, 0, 1, 1, 1, // -> 0
+		-1, -1,  1, 1, 0, 1, 0, 1, 0, 1, // -> 1
+		 1, -1, -1, 1, 0, 0, 1, 1, 0, 0, // -> 2
 	]);
 
-	let geometryIndexArray = new Uint16Array([
+	const customGeom = new GoldenRatio.CustomGeometry(renderer2.device, 1, GoldenRatio.PRIMITIVE_TYPE.TRIANGLE_LIST, false);
+	customGeom.allocate(geometryVertexArray);
+	return customGeom;
+};
+
+let createMultiGeometry: (renderer2: GoldenRatio.Renderer) => GoldenRatio.MultiGeometry = function (renderer2: GoldenRatio.Renderer): GoldenRatio.MultiGeometry {
+	let geometryVertexArray = new Float32Array([
+		// float4 position, float4 color, float2 uv,
+		-1, -1, -1, 1,   1, 0, 1, 1,  1, 1, // -> 0
+		-1, -1, 1, 1,  0, 0, 1, 1,  0, 1,   // -> 1
+		1, -1, -1, 1, 0, 0, 0, 1,  0, 0,    // -> 2
+		1, -1, 1, 1,  1, 0, 0, 1,  1, 0,    // -> 3
+		-1, 1, -1, 1,   1, 0, 1, 1,  1, 1,  // -> 4
+		-1, 1, 1, 1,  0, 0, 1, 1,  0, 1,    // -> 5
+		1, 1, -1, 1, 0, 0, 0, 1,  0, 0,     // -> 6
+		1, 1, 1, 1,  1, 0, 0, 1,  1, 0,     // -> 7
+	]);
+
+	// For Index its must be a strip
+	var geometryIndexArray = new Uint16Array([
 		0, 1, 2, 2, 1, 3, 0xFFFF,
 		4, 5, 6, 6, 5, 7, 0xFFFF,
 		0xFFFF, 0xFFFF,
 	 ]);
-	
-	// const customGeom = new GoldenRatio.CustomGeometry(renderer2.device, 1, GoldenRatio.PRIMITIVE_TYPE.TRIANGLE_STRIP);
-//	customGeom.allocate(geometryVertexArray, geometryIndexArray);
-	const customGeom = new GoldenRatio.CustomGeometry(renderer2.device, 1, GoldenRatio.PRIMITIVE_TYPE.TRIANGLE_LIST, false);
-	customGeom.allocate(geometryVertexArray);
+	const customGeom = new GoldenRatio.MultiGeometry(renderer2.device, GoldenRatio.PRIMITIVE_TYPE.TRIANGLE_STRIP, 8);
+	customGeom.append(geometryVertexArray, geometryIndexArray);
+	customGeom.drawgeometry();
 	return customGeom;
 };
 
@@ -168,13 +180,74 @@ window.onload = function(){
 		if (!success) return;
 
 		const scene2 = new GoldenRatio.Scene();
-		scene2.add(createCustomGeometry1(renderer2));
+		// for (let i = 0; i < 15000; i++)
+		//scene2.add(createCustomGeometry(renderer2));
+		
+//		scene2.add(createMultiGeometry(renderer2));
+	    const customGeom = new GoldenRatio.MultiGeometry(renderer2.device, GoldenRatio.PRIMITIVE_TYPE.TRIANGLE_STRIP, 80);
+        scene2.add(customGeom);
 
 		// Camera
 		camera2 = new GoldenRatio.Camera(canvas.width/ canvas.height);
         camera2.z = 12;
 	
 		const doFrame2 = () => {
+			let geometryVertexArray = new Float32Array([
+				// float4 position, float4 color, float2 uv,
+				-1, -1, -1, 1,   1, 0, 1, 1,  1, 1, // -> 0
+				-1, -1, 1, 1,  0, 0, 1, 1,  0, 1,   // -> 1
+				1, -1, -1, 1, 0, 0, 0, 1,  0, 0,    // -> 2
+				1, -1, 1, 1,  1, 0, 0, 1,  1, 0,    // -> 3
+				-1, 1, -1, 1,   1, 0, 1, 1,  1, 1,  // -> 4
+				-1, 1, 1, 1,  0, 0, 1, 1,  0, 1,    // -> 5
+				1, 1, -1, 1, 0, 0, 0, 1,  0, 0,     // -> 6
+				1, 1, 1, 1,  1, 0, 0, 1,  1, 0,     // -> 7
+			]);
+		
+			// For Index its must be a strip
+			let geometryIndexArray = new Uint16Array([
+				0, 1, 2, 2, 1, 3, 0xFFFF,
+				4, 5, 6, 6, 5, 7, 0xFFFF,
+				0xFFFF, 0xFFFF,
+			]);
+
+			let geometryVertexArray1 = new Float32Array([
+				// float4 position, float4 color, float2 uv,
+				-1, -1, -1, 1,   1, 0, 1, 1,  1, 1, // -> 0
+				-1, -1, 1, 1,  0, 0, 1, 1,  0, 1,   // -> 1
+				1, -1, -1, 1, 0, 0, 0, 1,  0, 0,    // -> 2
+				1, -1, 1, 1,  1, 0, 0, 1,  1, 0,    // -> 3
+			]);
+		
+			// For Index its must be a strip
+			// let geometryIndexArray1 = new Uint16Array([
+			// 	0, 1, 2, 2, 1, 3, 0xFFFF, 0xFFFF,
+			// ]);
+			let geometryIndexArray1 = new Uint16Array([
+				0, 1, 2, 2, 1, 3
+			]);
+
+			let geometryVertexArray2 = new Float32Array([
+				// float4 position, float4 color, float2 uv,
+				-1, 1, -1, 1,   1, 0, 1, 1,  1, 1,  // -> 4
+				-1, 1, 1, 1,  0, 0, 1, 1,  0, 1,    // -> 5
+				1, 1, -1, 1, 0, 0, 0, 1,  0, 0,     // -> 6
+				1, 1, 1, 1,  1, 0, 0, 1,  1, 0,     // -> 7
+			]);
+		
+			// For Index its must be a strip
+			// let geometryIndexArray2 = new Uint16Array([
+			// 	4, 5, 6, 6, 5, 7, 0xFFFF, 0xFFFF,
+			// ]);
+			let geometryIndexArray2 = new Uint16Array([
+				4, 5, 6, 6, 5, 7
+			]);
+			// let geometryIndexArray2 = new Uint16Array([
+			// 	0, 1, 2, 2, 1, 3
+			// ]);
+			customGeom.append(geometryVertexArray1, geometryIndexArray1);
+			customGeom.append(geometryVertexArray2, geometryIndexArray2);
+		
 			renderer2.render(scene2, camera2);
 			requestAnimationFrame(doFrame2);
 		};

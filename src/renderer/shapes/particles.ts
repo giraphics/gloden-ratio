@@ -100,7 +100,7 @@ export class Particles extends SceneGraph {
         });
 
         // const indices = new Uint16Array(idxSize / 2); /* Divide because 2 Uint16Array */
-        const indices = new Uint32Array(VERTEX_COUNT); /* Divide because 2 Uint16Array */
+        const indices = new Uint32Array(VERTEX_COUNT);
         for (let x = 0; x < VERTEX_COUNT; x++) {
             indices[x] = x;
         }

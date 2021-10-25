@@ -6,3 +6,4 @@ export { Camera } from './renderer/camera';
 export { Particles } from './shapes/particles';
 export { CubeObject } from './shapes/cube';
 export { CustomGeometry } from './shapes/customGeometry';
+export { MultiGeometry } from './shapes/multipleGeometry';
