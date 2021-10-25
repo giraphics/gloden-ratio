@@ -1,6 +1,7 @@
 import Gui from './ui/gui';
 import Binding from './binder/binding';
 import * as GoldenRatio from "./renderer/index";
+import { lookup } from 'dns';
 
 const binding = new Binding();
 const gui = new Gui(binding);
@@ -183,7 +184,7 @@ window.onload = function(){
 		//scene2.add(createCustomGeometry(renderer2));
 		
 //		scene2.add(createMultiGeometry(renderer2));
-	    const customGeom = new GoldenRatio.MultiGeometry(renderer2.device, GoldenRatio.PRIMITIVE_TYPE.TRIANGLE_STRIP, 80);
+	    const customGeom = new GoldenRatio.MultiGeometry(renderer2.device, GoldenRatio.PRIMITIVE_TYPE.LINE_STRIP, 80*5000);
         scene2.add(customGeom);
 
 		// Camera
@@ -244,10 +245,55 @@ window.onload = function(){
 			let geometryIndexArray2 = new Uint16Array([
 				0, 1, 2, 2, 1, 3
 			]);
-			customGeom.drawGeometry(geometryVertexArray1, geometryIndexArray1);
-			customGeom.drawGeometry(geometryVertexArray2, geometryIndexArray2);
-			// customGeom.drawGeometryNew(geometryVertexArray1);
-			// customGeom.drawGeometryNew(geometryVertexArray2);
+
+			// for (let i = 0; i < 5000; i++){
+			// 	customGeom.drawGeometry(geometryVertexArray1, geometryIndexArray1);
+			// 	customGeom.drawGeometry(geometryVertexArray2, geometryIndexArray2);
+			// }
+
+			var delX = 0.0;
+			var delY = 0.0;
+			for (let i = 0; i < 5000; i++){	
+				let geometryVertexArray5 = new Float32Array([
+					// float4 position, float4 color, float2 uv,
+					-1 + delX, -1 + delY, -1, 1,   1, 0, 1, 1,  1, 1, // -> 0
+					-1 + delX, -1 + delY, 1, 1,  0, 0, 1, 1,  0, 1,   // -> 1
+					1 + delX, -1 + delY, -1, 1, 0, 0, 0, 1,  0, 0,    // -> 2
+					1 + delX, -1 + delY, 1, 1,  1, 0, 0, 1,  1, 0,    // -> 3
+				]);
+	
+				let geometryVertexArray6 = new Float32Array([
+					// float4 position, float4 color, float2 uv,
+					-1 + delX, 1 + delY, -1, 1,   1, 0, 1, 1,  1, 1,  // -> 4
+					-1 + delX, 1 + delY, 1, 1,  0, 0, 1, 1,  0, 1,    // -> 5
+					1 + delX, 1 + delY, -1, 1, 0, 0, 0, 1,  0, 0,     // -> 6
+					1 + delX, 1 + delY, 1, 1,  1, 0, 0, 1,  1, 0,     // -> 7
+				]);
+				
+				customGeom.drawGeometry(geometryVertexArray5, geometryIndexArray1);
+				customGeom.drawGeometry(geometryVertexArray6, geometryIndexArray2);
+
+				delX += 0.01;
+				delY += 0.01;
+			}
+
+			// let geometryVertexArray3 = new Float32Array([
+			// 	// float4 position, float4 color, float2 uv,
+			// 	-1, -1, -1, 1,   1, 0, 1, 1,  1, 1, // -> 0
+			// 	-1, -1, 1, 1,  0, 0, 1, 1,  0, 1,   // -> 1
+			// 	1, -1, -1, 1, 0, 0, 0, 1,  0, 0,    // -> 2
+			// 	1, -1, 1, 1,  1, 0, 0, 1,  1, 0,    // -> 3
+			// ]);
+		
+			// let geometryVertexArray4 = new Float32Array([
+			// 	// float4 position, float4 color, float2 uv,
+			// 	-1, 1, -1, 1,   1, 0, 1, 1,  1, 1,  // -> 4
+			// 	-1, 1, 1, 1,  0, 0, 1, 1,  0, 1,    // -> 5
+			// 	1, 1, -1, 1, 0, 0, 0, 1,  0, 0,     // -> 6
+			// 	1, 1, 1, 1,  1, 0, 0, 1,  1, 0,     // -> 7
+			// ]);
+			// customGeom.drawGeometryNew(geometryVertexArray3);
+			// customGeom.drawGeometryNew(geometryVertexArray4);
 		
 			renderer2.render(scene2, camera2);
 			requestAnimationFrame(doFrame2);

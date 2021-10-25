@@ -79,8 +79,9 @@ export class MultiGeometry extends SceneGraph {
 
     public drawGeometry(geometryVertexArray: Float32Array, indexArray: Uint16Array)
     {
+        // const map2 = geometryVertexArray.map(x => x + 1);
+        // this.geometryHostBuffer.set(map2, this.totalVertexCount * ELEMENTS_PER_VERTEX);
         this.geometryHostBuffer.set(geometryVertexArray, this.totalVertexCount * ELEMENTS_PER_VERTEX);
-//        this.indexHostBuffer.set(indexArray, this.currentIdx);
 
         const map1 = indexArray.map(x => x + this.totalVertexCount);
         this.indexHostBuffer.set(map1, this.currentIdx);
@@ -92,26 +93,22 @@ export class MultiGeometry extends SceneGraph {
         this.currentIdx++;
     }
 
-    public drawGeometryNew(geometryVertexArray: Float32Array)
-    {
-        this.geometryHostBuffer.set(geometryVertexArray, this.totalVertexCount * ELEMENTS_PER_VERTEX);
-//        this.indexHostBuffer.set(indexArray, this.currentIdx);
+    // public drawGeometryNew(geometryVertexArray: Float32Array)
+    // {
+    //     this.geometryHostBuffer.set(geometryVertexArray, this.totalVertexCount * ELEMENTS_PER_VERTEX);
+    //     let currentVertexCount = geometryVertexArray.length / ELEMENTS_PER_VERTEX;
+    //     let currentIndexCount = currentVertexCount + 1;
+    //     for (let i = 0; i < currentIndexCount; i++) { // +1 for 0xFFFF
+    //         this.indexHostBuffer[i + this.totalVertexCount] = i + this.totalVertexCount;
 
-        // const map1 = indexArray.map(x => x + this.totalVertexCount);
-        // this.indexHostBuffer.set(map1, this.currentIdx);
+    //         if (i == currentVertexCount) { // last elemet idx
+    //             this.indexHostBuffer[this.currentIdx] = 0xFFFF;
+    //         }
+    //     }
 
-        let currentVertexCount = geometryVertexArray.length / ELEMENTS_PER_VERTEX;
-        let currentIndexCount = currentVertexCount + 1;
-        for (let i = 0; i < currentIndexCount; i++) { // +1 for 0xFFFF
-            this.indexHostBuffer[i + this.totalVertexCount] = i + this.totalVertexCount;
-            if (i == currentVertexCount) { // last elemet idx
-                this.indexHostBuffer[this.currentIdx] = 0xFFFF;
-            }
-        }
-
-        this.totalVertexCount += currentVertexCount;
-        this.currentIdx += currentIndexCount;
-    }
+    //     this.totalVertexCount += currentVertexCount;
+    //     this.currentIdx += currentIndexCount;
+    // }
 
     public initialize()
     {
