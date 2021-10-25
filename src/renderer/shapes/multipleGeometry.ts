@@ -7,14 +7,14 @@ import {PRIMITIVE_TYPE} from './../renderer/constants';
 
 const posOffset = 0;
 const colOffset = 4 * 4;
-const ELEMENTS = 10; // Vertex(4), Color(4), UV(2)
-const vertexSize = 4 * ELEMENTS;
+const ELEMENTS_PER_VERTEX = 10; // Vertex(4), Color(4), UV(2)
+const vertexSize = 4 * ELEMENTS_PER_VERTEX;
 
 export class MultiGeometry extends SceneGraph {
     private isIndexedGeometry: boolean = true;
     private geometryIndexCount: number = 0;
     private geometryVertexCount: number = 0;
-    private currentGeometryBufferLength: number = 0;
+    private totalVertexCount: number = 0;
     private currentIdx: number = 0;
     private geometryHostBuffer: Float32Array;
     private indexHostBuffer: Uint16Array;
@@ -50,9 +50,9 @@ export class MultiGeometry extends SceneGraph {
         this.rotY = 0.0;
         this.rotZ = 0.0;
 
-        this.geometryHostBuffer = new Float32Array(this.geometryVertexCount * ELEMENTS);
+        this.geometryHostBuffer = new Float32Array(this.geometryVertexCount * ELEMENTS_PER_VERTEX);
         this.geometryBuffer = this.device.createBuffer({
-            size: this.geometryVertexCount * ELEMENTS * 4,
+            size: this.geometryVertexCount * ELEMENTS_PER_VERTEX * 4,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
         });
 
@@ -69,27 +69,48 @@ export class MultiGeometry extends SceneGraph {
         this.initialize();
     }
 
-    public drawgeometry()
+    public updateBuffers()
     {
-        this.device.queue.writeBuffer(this.geometryBuffer, 0, this.geometryHostBuffer, 0, this.currentGeometryBufferLength * this.geometryHostBuffer.BYTES_PER_ELEMENT);
+        this.device.queue.writeBuffer(this.geometryBuffer, 0, this.geometryHostBuffer, 0, this.totalVertexCount * this.geometryHostBuffer.BYTES_PER_ELEMENT * ELEMENTS_PER_VERTEX);
         this.device.queue.writeBuffer(this.indexBuffer, 0, this.indexHostBuffer, 0, this.currentIdx * this.indexHostBuffer.BYTES_PER_ELEMENT); 
         // this.device.queue.writeBuffer(this.geometryBuffer, 0, this.geometryHostBuffer);
         // this.device.queue.writeBuffer(this.indexBuffer, 0, this.indexHostBuffer);
     }
 
-    public append(geometryVertexArray: Float32Array, indexArray: Uint16Array)
+    public drawGeometry(geometryVertexArray: Float32Array, indexArray: Uint16Array)
     {
-        this.geometryHostBuffer.set(geometryVertexArray, this.currentGeometryBufferLength);
-        this.indexHostBuffer.set(indexArray, this.currentIdx);
+        this.geometryHostBuffer.set(geometryVertexArray, this.totalVertexCount * ELEMENTS_PER_VERTEX);
+//        this.indexHostBuffer.set(indexArray, this.currentIdx);
 
-        // const map1 = indexArray.map(x => x + this.currentIdx);
-        // this.indexHostBuffer.set(map1, this.currentIdx);
+        const map1 = indexArray.map(x => x + this.totalVertexCount);
+        this.indexHostBuffer.set(map1, this.currentIdx);
 
-        this.currentGeometryBufferLength += geometryVertexArray.length;
+        this.totalVertexCount += geometryVertexArray.length / ELEMENTS_PER_VERTEX;
         this.currentIdx += indexArray.length;
 
         this.indexHostBuffer[this.currentIdx] = 0xFFFF;
         this.currentIdx++;
+    }
+
+    public drawGeometryNew(geometryVertexArray: Float32Array)
+    {
+        this.geometryHostBuffer.set(geometryVertexArray, this.totalVertexCount * ELEMENTS_PER_VERTEX);
+//        this.indexHostBuffer.set(indexArray, this.currentIdx);
+
+        // const map1 = indexArray.map(x => x + this.totalVertexCount);
+        // this.indexHostBuffer.set(map1, this.currentIdx);
+
+        let currentVertexCount = geometryVertexArray.length / ELEMENTS_PER_VERTEX;
+        let currentIndexCount = currentVertexCount + 1;
+        for (let i = 0; i < currentIndexCount; i++) { // +1 for 0xFFFF
+            this.indexHostBuffer[i + this.totalVertexCount] = i + this.totalVertexCount;
+            if (i == currentVertexCount) { // last elemet idx
+                this.indexHostBuffer[this.currentIdx] = 0xFFFF;
+            }
+        }
+
+        this.totalVertexCount += currentVertexCount;
+        this.currentIdx += currentIndexCount;
     }
 
     public initialize()
@@ -218,7 +239,7 @@ export class MultiGeometry extends SceneGraph {
         // PROJECT ON CAMERA
         mat4.multiply(this.modelViewProjectionMatrix, camera.getCameraViewProjMatrix(), modelMatrix);
         
-        this.drawgeometry();
+        this.updateBuffers();
         this.device.queue.writeBuffer(
             this.uniformBuffer,
             0,
@@ -231,7 +252,7 @@ export class MultiGeometry extends SceneGraph {
         passEncoder.setBindGroup(0, this.uniformBindGroup);
         passEncoder.setIndexBuffer(this.indexBuffer, 'uint16');
         passEncoder.drawIndexed(this.currentIdx, 1);
-        this.currentGeometryBufferLength = 0;
+        this.totalVertexCount = 0;
         this.currentIdx = 0;
     }
 }

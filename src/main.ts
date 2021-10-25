@@ -106,8 +106,7 @@ let createMultiGeometry: (renderer2: GoldenRatio.Renderer) => GoldenRatio.MultiG
 		0xFFFF, 0xFFFF,
 	 ]);
 	const customGeom = new GoldenRatio.MultiGeometry(renderer2.device, GoldenRatio.PRIMITIVE_TYPE.TRIANGLE_STRIP, 8);
-	customGeom.append(geometryVertexArray, geometryIndexArray);
-	customGeom.drawgeometry();
+	customGeom.drawGeometry(geometryVertexArray, geometryIndexArray);
 	return customGeom;
 };
 
@@ -239,14 +238,16 @@ window.onload = function(){
 			// let geometryIndexArray2 = new Uint16Array([
 			// 	4, 5, 6, 6, 5, 7, 0xFFFF, 0xFFFF,
 			// ]);
-			let geometryIndexArray2 = new Uint16Array([
-				4, 5, 6, 6, 5, 7
-			]);
 			// let geometryIndexArray2 = new Uint16Array([
-			// 	0, 1, 2, 2, 1, 3
+			// 	4, 5, 6, 6, 5, 7
 			// ]);
-			customGeom.append(geometryVertexArray1, geometryIndexArray1);
-			customGeom.append(geometryVertexArray2, geometryIndexArray2);
+			let geometryIndexArray2 = new Uint16Array([
+				0, 1, 2, 2, 1, 3
+			]);
+			customGeom.drawGeometry(geometryVertexArray1, geometryIndexArray1);
+			customGeom.drawGeometry(geometryVertexArray2, geometryIndexArray2);
+			// customGeom.drawGeometryNew(geometryVertexArray1);
+			// customGeom.drawGeometryNew(geometryVertexArray2);
 		
 			renderer2.render(scene2, camera2);
 			requestAnimationFrame(doFrame2);
