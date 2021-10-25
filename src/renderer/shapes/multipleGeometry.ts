@@ -214,7 +214,15 @@ export class MultiGeometry extends SceneGraph {
         });
     }
 
+    public resetIndex(): void {
+        this.totalVertexCount = 0;
+        this.currentIdx = 0;
+    }
+
     public draw(passEncoder: GPURenderPassEncoder, camera: Camera): void {
+        // this.updateBuffers();
+        // this.resetIndex();
+
         // draw = (passEncoder: GPURenderPassEncoder, camera: Camera) => {
         passEncoder.setPipeline(this.pipeline);
 
@@ -236,7 +244,6 @@ export class MultiGeometry extends SceneGraph {
         // PROJECT ON CAMERA
         mat4.multiply(this.modelViewProjectionMatrix, camera.getCameraViewProjMatrix(), modelMatrix);
         
-        this.updateBuffers();
         this.device.queue.writeBuffer(
             this.uniformBuffer,
             0,
@@ -249,7 +256,5 @@ export class MultiGeometry extends SceneGraph {
         passEncoder.setBindGroup(0, this.uniformBindGroup);
         passEncoder.setIndexBuffer(this.indexBuffer, 'uint16');
         passEncoder.drawIndexed(this.currentIdx, 1);
-        this.totalVertexCount = 0;
-        this.currentIdx = 0;
     }
 }
