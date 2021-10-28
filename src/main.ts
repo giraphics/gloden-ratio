@@ -418,15 +418,17 @@ window.onload = function(){
 //		scene2.add(createMultiGeometry(renderer2));
 
 		const shapetest = new ShapeTest;
-		const customGeom = new GoldenRatio.MultiGeometry(renderer2.device, GoldenRatio.PRIMITIVE_TYPE.TRIANGLE_STRIP, 360*10000);
+		let geometryCount: number = 5000;
+		const customGeom = new GoldenRatio.MultiGeometry(renderer2.device, GoldenRatio.PRIMITIVE_TYPE.TRIANGLE_STRIP, 360 * geometryCount);
         scene2.add(customGeom);
 
 		// Camera
-		camera2 = new GoldenRatio.Camera(canvas.width/ canvas.height);
+		camera2 = new GoldenRatio.Camera(canvas.width / canvas.height);
         camera2.z = 12;
 	
 		const doFrame2 = () => {
-			shapetest.updateCubesMultiGeometry(customGeom);
+			//shapetest.drawCubev36(customGeom, geometryCount);
+			shapetest.drawCubev8(customGeom, geometryCount);
 			customGeom.updateBuffers();
 			
 			renderer2.render(scene2, camera2);

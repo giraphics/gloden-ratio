@@ -14,8 +14,8 @@ export enum PRIMITIVE_TYPE {
   NONE           = 0 << 0,
   POINT_LIST     = 1 << 1,
   LINE_LIST      = 1 << 2,
-  LINE_STRIP     = 1 << 3,
-  TRIANGLE_LIST  = 1 << 4,
+  TRIANGLE_LIST  = 1 << 3,
+  LINE_STRIP     = 1 << 4,
   TRIANGLE_STRIP = 1 << 5,
 }
 

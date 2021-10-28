@@ -43,7 +43,7 @@ export class MultiGeometry extends SceneGraph {
         super(primitiveType);
         
         this.device = device;
-        this.isIndexedGeometry = true;
+        this.isIndexedGeometry = (primitiveType > PRIMITIVE_TYPE.TRIANGLE_LIST);
         this.geometryVertexCount = geometryVertexCount;
 
         this.rotX = 0.0;

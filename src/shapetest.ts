@@ -1,8 +1,9 @@
 import * as GoldenRatio from "./renderer/index";
 
 export default class ShapeTest {
-	public updateCubesMultiGeometry (customGeom: GoldenRatio.MultiGeometry)
+	public drawCubev36(customGeom: GoldenRatio.MultiGeometry, geometryCount: number)
 	{
+		// 1100 @30FPS
 		const cubeIndexArray = new Uint16Array([
 			0, 1, 2, 3, 4, 5,
 			6, 7, 8, 9, 10, 11,
@@ -14,7 +15,8 @@ export default class ShapeTest {
 					
 		var delX = 0.0;
 		var delY = 0.0;
-		for (let i = 0; i < 10000; i++) {
+
+		for (let i = 0; i < geometryCount; i++) {
 			let geometryVertexArray7 = new Float32Array([
 				// float4 position, float4 color, float2 uv,
 				1, -1, 1, 1,   1, 0, 1, 1,  1, 1,
@@ -59,6 +61,78 @@ export default class ShapeTest {
 				1, -1, -1, 1,  1, 0, 0, 1,  1, 1,
 				-1, 1, -1, 1,  0, 1, 0, 1,  0, 0,
 			]);
+			customGeom.drawGeometry(geometryVertexArray7, cubeIndexArray);
+	
+			delX += 0.01;
+			delY += 0.01;
+		}
+	}
+
+	public drawCubev8 (customGeom: GoldenRatio.MultiGeometry, geometryCount: number)
+	{
+		// 5000 @30FPS
+		const cubeIndexArray = new Uint16Array([
+			0,3,1, 3,2,1,
+			7,4,6, 4,5,6,
+			4,0,5, 0,1,5,
+			3,7,2, 7,6,2,
+			1,2,5, 2,6,5,
+			3,0,7, 0,4,7,
+		]);
+					
+		var delX = 0.0;
+		var delY = 0.0;
+		
+		for (let i = 0; i < geometryCount; i++) {
+			let geometryVertexArray7 = new Float32Array([
+				// float4 position, float4 color, float2 uv,
+				-1, -1, 1, 1,   1, 0, 1, 1,  1, 1,
+				-1,  1, 1, 1,  0, 0, 1, 1,  0, 1,
+				1,  1, 1, 1,  0, 1, 0, 1,  0, 1,
+				1, -1, 1, 1, 1, 0, 0, 1,  0, 0,
+
+				-1, -1, -1, 1,  1, 1, 0, 1,  1, 0,
+				-1, 1, -1, 1,   1, 1, 1, 1,  1, 1,
+				1, 1, -1, 1, 0, 1, 1, 1,  0, 0,
+				1, -1, -1, 1, 1, 0, 1, 1,  0, 0,
+			]);
+
+			customGeom.drawGeometry(geometryVertexArray7, cubeIndexArray);
+	
+			delX += 0.01;
+			delY += 0.01;
+		}
+	}
+
+	public drawCubev8Line (customGeom: GoldenRatio.MultiGeometry, geometryCount: number)
+	{
+		// 5000 @30FPS
+		const cubeIndexArray = new Uint16Array([
+			0,3,1, 3,2,1,
+			7,4,6, 4,5,6,
+			4,0,5, 0,1,5,
+			3,7,2, 7,6,2,
+			1,2,5, 2,6,5,
+			3,0,7, 0,4,7,
+		]);
+					
+		var delX = 0.0;
+		var delY = 0.0;
+		
+		for (let i = 0; i < geometryCount; i++) {
+			let geometryVertexArray7 = new Float32Array([
+				// float4 position, float4 color, float2 uv,
+				-1, -1, 1, 1,   1, 0, 1, 1,  1, 1,
+				-1,  1, 1, 1,  0, 0, 1, 1,  0, 1,
+				1,  1, 1, 1,  0, 1, 0, 1,  0, 1,
+				1, -1, 1, 1, 1, 0, 0, 1,  0, 0,
+
+				-1, -1, -1, 1,  1, 1, 0, 1,  1, 0,
+				-1, 1, -1, 1,   1, 1, 1, 1,  1, 1,
+				1, 1, -1, 1, 0, 1, 1, 1,  0, 0,
+				1, -1, -1, 1, 1, 0, 1, 1,  0, 0,
+			]);
+
 			customGeom.drawGeometry(geometryVertexArray7, cubeIndexArray);
 	
 			delX += 0.01;
