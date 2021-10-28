@@ -1,7 +1,7 @@
 import * as GoldenRatio from "./renderer/index";
 
 export default class ShapeTest {
-	public drawCubev36(customGeom: GoldenRatio.MultiGeometry, geometryCount: number)
+	public drawCubev36(customGeom: GoldenRatio.MultiGeometry, geometryCount: number, step: number)
 	{
 		// 1100 @30FPS
 		const cubeIndexArray = new Uint16Array([
@@ -19,56 +19,56 @@ export default class ShapeTest {
 		for (let i = 0; i < geometryCount; i++) {
 			let geometryVertexArray7 = new Float32Array([
 				// float4 position, float4 color, float2 uv,
-				1, -1, 1, 1,   1, 0, 1, 1,  1, 1,
-				-1, -1, 1, 1,  0, 0, 1, 1,  0, 1,
-				-1, -1, -1, 1, 0, 0, 0, 1,  0, 0,
-				1, -1, -1, 1,  1, 0, 0, 1,  1, 0,
-				1, -1, 1, 1,   1, 0, 1, 1,  1, 1,
-				-1, -1, -1, 1, 0, 0, 0, 1,  0, 0,
+				1 + delX, -1 + delY, 1, 1,   1, 0, 1, 1,  1, 1,
+				-1 + delX, -1 + delY, 1, 1,  0, 0, 1, 1,  0, 1,
+				-1 + delX, -1 + delY, -1, 1, 0, 0, 0, 1,  0, 0,
+				1 + delX, -1 + delY, -1, 1,  1, 0, 0, 1,  1, 0,
+				1 + delX, -1 + delY, 1, 1,   1, 0, 1, 1,  1, 1,
+				-1 + delX, -1 + delY, -1, 1, 0, 0, 0, 1,  0, 0,
 	
-				1, 1, 1, 1,    1, 1, 1, 1,  1, 1,
-				1, -1, 1, 1,   1, 0, 1, 1,  0, 1,
-				1, -1, -1, 1,  1, 0, 0, 1,  0, 0,
-				1, 1, -1, 1,   1, 1, 0, 1,  1, 0,
-				1, 1, 1, 1,    1, 1, 1, 1,  1, 1,
-				1, -1, -1, 1,  1, 0, 0, 1,  0, 0,
+				1 + delX, 1 + delY, 1, 1,    1, 1, 1, 1,  1, 1,
+				1 + delX, -1 + delY, 1, 1,   1, 0, 1, 1,  0, 1,
+				1 + delX, -1 + delY, -1, 1,  1, 0, 0, 1,  0, 0,
+				1 + delX, 1 + delY, -1, 1,   1, 1, 0, 1,  1, 0,
+				1 + delX, 1 + delY, 1, 1,    1, 1, 1, 1,  1, 1,
+				1 + delX, -1 + delY, -1, 1,  1, 0, 0, 1,  0, 0,
 	
-				-1, 1, 1, 1,   0, 1, 1, 1,  1, 1,
-				1, 1, 1, 1,    1, 1, 1, 1,  0, 1,
-				1, 1, -1, 1,   1, 1, 0, 1,  0, 0,
-				-1, 1, -1, 1,  0, 1, 0, 1,  1, 0,
-				-1, 1, 1, 1,   0, 1, 1, 1,  1, 1,
-				1, 1, -1, 1,   1, 1, 0, 1,  0, 0,
+				-1 + delX, 1 + delY, 1, 1,   0, 1, 1, 1,  1, 1,
+				1 + delX, 1 + delY, 1, 1,    1, 1, 1, 1,  0, 1,
+				1 + delX, 1 + delY, -1, 1,   1, 1, 0, 1,  0, 0,
+				-1 + delX, 1 + delY, -1, 1,  0, 1, 0, 1,  1, 0,
+				-1 + delX, 1 + delY, 1, 1,   0, 1, 1, 1,  1, 1,
+				1 + delX, 1 + delY, -1, 1,   1, 1, 0, 1,  0, 0,
 	
-				-1, -1, 1, 1,  0, 0, 1, 1,  1, 1,
-				-1, 1, 1, 1,   0, 1, 1, 1,  0, 1,
-				-1, 1, -1, 1,  0, 1, 0, 1,  0, 0,
-				-1, -1, -1, 1, 0, 0, 0, 1,  1, 0,
-				-1, -1, 1, 1,  0, 0, 1, 1,  1, 1,
-				-1, 1, -1, 1,  0, 1, 0, 1,  0, 0,
+				-1 + delX, -1 + delY, 1, 1,  0, 0, 1, 1,  1, 1,
+				-1 + delX, 1 + delY, 1, 1,   0, 1, 1, 1,  0, 1,
+				-1 + delX, 1 + delY, -1, 1,  0, 1, 0, 1,  0, 0,
+				-1 + delX, -1 + delY, -1, 1, 0, 0, 0, 1,  1, 0,
+				-1 + delX, -1 + delY, 1, 1,  0, 0, 1, 1,  1, 1,
+				-1 + delX, 1 + delY, -1, 1,  0, 1, 0, 1,  0, 0,
 	
-				1, 1, 1, 1,    1, 1, 1, 1,  1, 1,
-				-1, 1, 1, 1,   0, 1, 1, 1,  0, 1,
-				-1, -1, 1, 1,  0, 0, 1, 1,  0, 0,
-				-1, -1, 1, 1,  0, 0, 1, 1,  0, 0,
-				1, -1, 1, 1,   1, 0, 1, 1,  1, 0,
-				1, 1, 1, 1,    1, 1, 1, 1,  1, 1,
+				1 + delX, 1 + delY, 1, 1,    1, 1, 1, 1,  1, 1,
+				-1 + delX, 1 + delY, 1, 1,   0, 1, 1, 1,  0, 1,
+				-1 + delX, -1 + delY, 1, 1,  0, 0, 1, 1,  0, 0,
+				-1 + delX, -1 + delY, 1, 1,  0, 0, 1, 1,  0, 0,
+				1 + delX, -1 + delY, 1, 1,   1, 0, 1, 1,  1, 0,
+				1 + delX, 1 + delY, 1, 1,    1, 1, 1, 1,  1, 1,
 	
-				1, -1, -1, 1,  1, 0, 0, 1,  1, 1,
-				-1, -1, -1, 1, 0, 0, 0, 1,  0, 1,
-				-1, 1, -1, 1,  0, 1, 0, 1,  0, 0,
-				1, 1, -1, 1,   1, 1, 0, 1,  1, 0,
-				1, -1, -1, 1,  1, 0, 0, 1,  1, 1,
-				-1, 1, -1, 1,  0, 1, 0, 1,  0, 0,
+				1 + delX, -1 + delY, -1, 1,  1, 0, 0, 1,  1, 1,
+				-1 + delX, -1 + delY, -1, 1, 0, 0, 0, 1,  0, 1,
+				-1 + delX, 1 + delY, -1, 1,  0, 1, 0, 1,  0, 0,
+				1 + delX, 1 + delY, -1, 1,   1, 1, 0, 1,  1, 0,
+				1 + delX, -1 + delY, -1, 1,  1, 0, 0, 1,  1, 1,
+				-1 + delX, 1 + delY, -1, 1,  0, 1, 0, 1,  0, 0,
 			]);
 			customGeom.drawGeometry(geometryVertexArray7, cubeIndexArray);
 	
-			delX += 0.01;
-			delY += 0.01;
+			delX += step;
+			delY += step;
 		}
 	}
 
-	public drawCubev8 (customGeom: GoldenRatio.MultiGeometry, geometryCount: number)
+	public drawCubev8TriangleList (customGeom: GoldenRatio.MultiGeometry, geometryCount: number, step: number)
 	{
 		// 5000 @30FPS
 		const cubeIndexArray = new Uint16Array([
@@ -86,25 +86,25 @@ export default class ShapeTest {
 		for (let i = 0; i < geometryCount; i++) {
 			let geometryVertexArray7 = new Float32Array([
 				// float4 position, float4 color, float2 uv,
-				-1, -1, 1, 1,   1, 0, 1, 1,  1, 1,
-				-1,  1, 1, 1,  0, 0, 1, 1,  0, 1,
-				1,  1, 1, 1,  0, 1, 0, 1,  0, 1,
-				1, -1, 1, 1, 1, 0, 0, 1,  0, 0,
+				-1 + delX, -1 + delY, 1, 1,   1, 0, 1, .5,  1, 1,
+				-1 + delX,  1 + delY, 1, 1,  0, 0, 1, .5,  0, 1,
+				1 + delX,  1 + delY, 1, 1,  0, 1, 0, .5,  0, 1,
+				1 + delX, -1 + delY, 1, 1, 1, 0, 0, .5,  0, 0,
 
-				-1, -1, -1, 1,  1, 1, 0, 1,  1, 0,
-				-1, 1, -1, 1,   1, 1, 1, 1,  1, 1,
-				1, 1, -1, 1, 0, 1, 1, 1,  0, 0,
-				1, -1, -1, 1, 1, 0, 1, 1,  0, 0,
+				-1 + delX, -1 + delY, -1, 1,  1, 1, 0, .5,  1, 0,
+				-1 + delX, 1 + delY, -1, 1,   1, 1, 1, .5,  1, 1,
+				1 + delX, 1 + delY, -1, 1, 0, 1, 1, .5,  0, 0,
+				1 + delX, -1 + delY, -1, 1, 1, 0, 1, .5,  0, 0,
 			]);
 
 			customGeom.drawGeometry(geometryVertexArray7, cubeIndexArray);
 	
-			delX += 0.01;
-			delY += 0.01;
+			delX += step;
+			delY += step;
 		}
 	}
 
-	public drawCubev8Line (customGeom: GoldenRatio.MultiGeometry, geometryCount: number)
+	public drawCubev8Line (customGeom: GoldenRatio.MultiGeometry, geometryCount: number, step: number)
 	{
 		// 5000 @30FPS
 		const cubeIndexArray = new Uint16Array([
@@ -130,34 +130,33 @@ export default class ShapeTest {
 		for (let i = 0; i < geometryCount; i++) {
 			let geometryVertexArray7 = new Float32Array([
 				// float4 position, float4 color, float2 uv,
-				-1, -1, 1, 1,   1, 0, 1, 1,  1, 1,
-				-1,  1, 1, 1,  0, 0, 1, 1,  0, 1,
-				1,  1, 1, 1,  0, 1, 0, 1,  0, 1,
-				1, -1, 1, 1, 1, 0, 0, 1,  0, 0,
+				-1 + delX, -1 + delY, 1, 1,   1, 0, 1, 1,  1, 1,
+				-1 + delX,  1 + delY, 1, 1,  0, 0, 1, 1,  0, 1,
+				1 + delX,  1 + delY, 1, 1,  0, 1, 0, 1,  0, 1,
+				1 + delX, -1 + delY, 1, 1, 1, 0, 0, 1,  0, 0,
 
-				-1, -1, -1, 1,  1, 1, 0, 1,  1, 0,
-				-1, 1, -1, 1,   1, 1, 1, 1,  1, 1,
-				1, 1, -1, 1, 0, 1, 1, 1,  0, 0,
-				1, -1, -1, 1, 1, 0, 1, 1,  0, 0,
+				-1 + delX, -1 + delY, -1, 1,  1, 1, 0, 1,  1, 0,
+				-1 + delX, 1 + delY, -1, 1,   1, 1, 1, 1,  1, 1,
+				1 + delX, 1 + delY, -1, 1, 0, 1, 1, 1,  0, 0,
+				1 + delX, -1 + delY, -1, 1, 1, 0, 1, 1,  0, 0,
 			]);
 
 			customGeom.drawGeometry(geometryVertexArray7, cubeIndexArray);
 	
-			delX += 0.01;
-			delY += 0.01;
+			delX += step;
+			delY += step;
 		}
 	}
 
 	public drawGrid(customGeom: GoldenRatio.MultiGeometry, geometryCount: number)
 	{
-		let size = 10;
- 		let halfSize = 10 / 2;
- 		let divisions = 10;
+		let size = 50;
+ 		let halfSize = 50 / 2;
+ 		let divisions = 50;
  		let step = 1;
 
 		let interleaveData = [];
 		let idxData = [];
-		let center = divisions / 2;
 		 step = size / divisions;
 		 halfSize = size / 2;
 		 for (let i = 0, k = -halfSize; i <= divisions; i++ , k += step) {

@@ -7,12 +7,10 @@ import {PRIMITIVE_TYPE, TYPE_SIZE} from './../renderer/constants';
 
 const posOffset = 0;
 const colOffset = 4 * 4;
-// const ELEMENTS_PER_VERTEX = 10; // Vertex(4), Color(4), UV(2)
-// const vertexSize = 4 * ELEMENTS_PER_VERTEX;
 
 export class MultiGeometry extends SceneGraph {
     private geometryIndexCount: number = 0;
-    private geometryVertexCount: number = 0;
+    private vertexUppperLimit: number = 65536; // Max of index
     private totalVertexCount: number = 0;
     private currentIdx: number = 0;
     private geometryHostBuffer: Float32Array;
@@ -38,24 +36,27 @@ export class MultiGeometry extends SceneGraph {
     private rotY: number;
     private rotZ: number;
 
-    constructor(device: GPUDevice, primitiveType: PRIMITIVE_TYPE, geometryVertexCount: number, typeInfo?: TYPE_SIZE[]) {
-        super(primitiveType, typeInfo);
+    constructor(device: GPUDevice, primitiveType: PRIMITIVE_TYPE, vertexUppperLimit?: number) {
+        // presently type info is 10 elements fixed vertex 4, color 4, uv 2
+        super(primitiveType, /*typeInfo*/ [TYPE_SIZE.float32x4, TYPE_SIZE.float32x4, TYPE_SIZE.float32x2]);
         
         this.device = device;
-        this.geometryVertexCount = geometryVertexCount;
+        if (vertexUppperLimit) {
+            this.vertexUppperLimit = vertexUppperLimit;
+        }
 
         this.rotX = 0.0;
         this.rotY = 0.0;
         this.rotZ = 0.0;
 
-        this.geometryHostBuffer = new Float32Array(this.geometryVertexCount * this.elementCount);
+        this.geometryHostBuffer = new Float32Array(this.vertexUppperLimit * this.elementCount);
         this.geometryBuffer = this.device.createBuffer({
-            size: this.geometryVertexCount * this.elementCount * 4,
+            size: this.vertexUppperLimit * this.elementCount * 4,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
         });
 
         
-        this.geometryIndexCount = this.geometryVertexCount * 2;
+        this.geometryIndexCount = this.vertexUppperLimit * 2;
         let idxSize = (this.geometryIndexCount * 2 + 3) & ~3;
         this.indexHostBuffer = new Uint16Array(idxSize / 2);
         this.indexBuffer = this.device.createBuffer({
@@ -76,33 +77,16 @@ export class MultiGeometry extends SceneGraph {
     public drawGeometry(geometryVertexArray: Float32Array, indexArray: Uint16Array)
     {
         this.geometryHostBuffer.set(geometryVertexArray, this.totalVertexCount * this.elementCount);
-
-        const map1 = indexArray.map(x => x + this.totalVertexCount);
-        this.indexHostBuffer.set(map1, this.currentIdx);
+        this.indexHostBuffer.set(indexArray.map(x => x + this.totalVertexCount), this.currentIdx);
 
         this.totalVertexCount += geometryVertexArray.length / this.elementCount;
         this.currentIdx += indexArray.length;
 
-        // this.indexHostBuffer[this.currentIdx] = 0xFFFF;
-        // this.currentIdx++;
+        if (this.isPrimtiveTypeStrip){
+            this.indexHostBuffer[this.currentIdx] = 0xFFFF;
+            this.currentIdx++;
+        }
     }
-
-    // public drawGeometryNew(geometryVertexArray: Float32Array)
-    // {
-    //     this.geometryHostBuffer.set(geometryVertexArray, this.totalVertexCount * this.elementCount);
-    //     let currentVertexCount = geometryVertexArray.length / this.elementCount;
-    //     let currentIndexCount = currentVertexCount + 1;
-    //     for (let i = 0; i < currentIndexCount; i++) { // +1 for 0xFFFF
-    //         this.indexHostBuffer[i + this.totalVertexCount] = i + this.totalVertexCount;
-
-    //         if (i == currentVertexCount) { // last elemet idx
-    //             this.indexHostBuffer[this.currentIdx] = 0xFFFF;
-    //         }
-    //     }
-
-    //     this.totalVertexCount += currentVertexCount;
-    //     this.currentIdx += currentIndexCount;
-    // }
 
     public initialize()
     {
@@ -156,8 +140,30 @@ export class MultiGeometry extends SceneGraph {
 
         // Color/Blend State
         const colorState: GPUColorTargetState = {
-            format: 'bgra8unorm'
-        };
+            format: 'bgra8unorm',
+            blend: {
+                // color: {
+                //   srcFactor: "src-alpha",
+                //   dstFactor: "one-minus-src-alpha",
+                //   operation: "add"
+                // },
+                // alpha: {
+                //     srcFactor: "src-alpha",
+                //     dstFactor: "one",
+                //     operation: "add"
+                // }
+                color: {
+                  srcFactor: "src-alpha",
+                  dstFactor: "one-minus-src-alpha",
+                  operation: "add"
+                },
+                alpha: {
+                  srcFactor: "src-alpha",
+                  dstFactor: "one-minus-src-alpha",
+                  operation: "add"
+                }
+              }
+          };
 
         const fragment: GPUFragmentState = {
             module: this.fragModule,
