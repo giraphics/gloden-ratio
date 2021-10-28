@@ -108,12 +108,20 @@ export default class ShapeTest {
 	{
 		// 5000 @30FPS
 		const cubeIndexArray = new Uint16Array([
-			0,3,1, 3,2,1,
-			7,4,6, 4,5,6,
-			4,0,5, 0,1,5,
-			3,7,2, 7,6,2,
-			1,2,5, 2,6,5,
-			3,0,7, 0,4,7,
+			0, 1,
+			1, 2,
+			2, 3,
+			3, 0,
+
+			4, 5,
+			5, 6,
+			6, 7,
+			7, 4,
+
+			0, 4,
+			1, 5,
+			2, 6,
+			3, 7,
 		]);
 					
 		var delX = 0.0;
@@ -137,6 +145,37 @@ export default class ShapeTest {
 	
 			delX += 0.01;
 			delY += 0.01;
+		}
+	}
+
+	public drawGrid(customGeom: GoldenRatio.MultiGeometry, geometryCount: number)
+	{
+		let size = 10;
+ 		let halfSize = 10 / 2;
+ 		let divisions = 10;
+ 		let step = 1;
+
+		let interleaveData = [];
+		let idxData = [];
+		let center = divisions / 2;
+		 step = size / divisions;
+		 halfSize = size / 2;
+		 for (let i = 0, k = -halfSize; i <= divisions; i++ , k += step) {
+		   interleaveData.push(
+			 -halfSize, 0, k, 1, 1, 1, 1, 1, 1, 1,
+			 halfSize, 0, k, 1, 1, 1, 1, 1, 1, 1,
+			 k, 0, -halfSize, 1, 1, 1, 1, 1, 1, 1,
+			 k, 0, halfSize, 1, 1, 1, 1, 1, 1, 1,
+		   );
+
+		   idxData.push(0 + i * 4, 1 + i * 4, 2 + i * 4, 3 + i * 4);
+		}
+
+		let vertexGrid = new Float32Array(interleaveData);
+		let idxGrid = new Uint16Array(idxData);
+							 
+		for (let i = 0; i < geometryCount; i++) {
+			customGeom.drawGeometry(vertexGrid, idxGrid);
 		}
 	}
 

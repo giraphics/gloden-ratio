@@ -1,6 +1,6 @@
 import UUID from './objid';
 import { Camera } from './../renderer/camera';
-import {PRIMITIVE_TYPE} from './../renderer/constants';
+import {PRIMITIVE_TYPE, TYPE_SIZE} from './../renderer/constants';
 
 export abstract class AbstractShape extends UUID{
 //    public abstract render(frame: Frame): void;
@@ -14,10 +14,20 @@ export default class BaseShape extends AbstractShape {
     public fragModule: GPUShaderModule;
     public pipeline: GPURenderPipeline;
     protected primitiveType: GPUPrimitiveTopology;
+    protected isPrimtiveTypeStrip: boolean = false;
+    protected vertexSize: number = 0;
+    protected elementCount: number = 0;
 
-    constructor(primitiveType: PRIMITIVE_TYPE) {
+    constructor(primitiveType: PRIMITIVE_TYPE, typeInfo: TYPE_SIZE[]) {
         super();
 
+        for (let i of typeInfo) {
+            this.vertexSize += i;
+            this.elementCount += i / Float32Array.BYTES_PER_ELEMENT;
+        }
+        console.log(this.vertexSize);
+        console.log(this.elementCount);
+    
         switch(primitiveType) {
             case PRIMITIVE_TYPE.POINT_LIST: { 
                 this.primitiveType = "point-list"; 
@@ -40,6 +50,7 @@ export default class BaseShape extends AbstractShape {
                break; 
             } 
         }         
+        this.isPrimtiveTypeStrip = (primitiveType > PRIMITIVE_TYPE.TRIANGLE_LIST);
     }
     
     public draw(passEncoder: GPURenderPassEncoder, camera: Camera): void {

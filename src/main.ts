@@ -1,6 +1,7 @@
 import Gui from './ui/gui';
 import Binding from './binder/binding';
 import * as GoldenRatio from "./renderer/index";
+import {TYPE_SIZE} from "./renderer/renderer/constants";
 import ShapeTest from "./shapetest";
 
 const binding = new Binding();
@@ -418,8 +419,9 @@ window.onload = function(){
 //		scene2.add(createMultiGeometry(renderer2));
 
 		const shapetest = new ShapeTest;
-		let geometryCount: number = 5000;
-		const customGeom = new GoldenRatio.MultiGeometry(renderer2.device, GoldenRatio.PRIMITIVE_TYPE.TRIANGLE_STRIP, 360 * geometryCount);
+		let geometryCount: number = 1;
+		const customGeom = new GoldenRatio.MultiGeometry(renderer2.device, GoldenRatio.PRIMITIVE_TYPE.LINE_LIST, 360 * geometryCount, 
+			[TYPE_SIZE.float32x4, TYPE_SIZE.float32x4, TYPE_SIZE.float32x2]);
         scene2.add(customGeom);
 
 		// Camera
@@ -427,8 +429,11 @@ window.onload = function(){
         camera2.z = 12;
 	
 		const doFrame2 = () => {
-			//shapetest.drawCubev36(customGeom, geometryCount);
-			shapetest.drawCubev8(customGeom, geometryCount);
+			// shapetest.drawCubev36(customGeom, geometryCount);
+			// shapetest.drawCubev8(customGeom, geometryCount);
+			shapetest.drawCubev8Line(customGeom, geometryCount);
+			shapetest.drawGrid(customGeom, geometryCount);
+			
 			customGeom.updateBuffers();
 			
 			renderer2.render(scene2, camera2);

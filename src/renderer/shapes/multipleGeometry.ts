@@ -3,15 +3,14 @@ import fragShaderCode from './shaders/cube.frag.wgsl';
 import { mat4, vec3 } from 'gl-matrix';
 import { Camera } from './../renderer/camera';
 import SceneGraph from './../base/scenegraph';
-import {PRIMITIVE_TYPE} from './../renderer/constants';
+import {PRIMITIVE_TYPE, TYPE_SIZE} from './../renderer/constants';
 
 const posOffset = 0;
 const colOffset = 4 * 4;
-const ELEMENTS_PER_VERTEX = 10; // Vertex(4), Color(4), UV(2)
-const vertexSize = 4 * ELEMENTS_PER_VERTEX;
+// const ELEMENTS_PER_VERTEX = 10; // Vertex(4), Color(4), UV(2)
+// const vertexSize = 4 * ELEMENTS_PER_VERTEX;
 
 export class MultiGeometry extends SceneGraph {
-    private isIndexedGeometry: boolean = true;
     private geometryIndexCount: number = 0;
     private geometryVertexCount: number = 0;
     private totalVertexCount: number = 0;
@@ -39,20 +38,19 @@ export class MultiGeometry extends SceneGraph {
     private rotY: number;
     private rotZ: number;
 
-    constructor(device: GPUDevice, primitiveType: PRIMITIVE_TYPE, geometryVertexCount: number) {
-        super(primitiveType);
+    constructor(device: GPUDevice, primitiveType: PRIMITIVE_TYPE, geometryVertexCount: number, typeInfo?: TYPE_SIZE[]) {
+        super(primitiveType, typeInfo);
         
         this.device = device;
-        this.isIndexedGeometry = (primitiveType > PRIMITIVE_TYPE.TRIANGLE_LIST);
         this.geometryVertexCount = geometryVertexCount;
 
         this.rotX = 0.0;
         this.rotY = 0.0;
         this.rotZ = 0.0;
 
-        this.geometryHostBuffer = new Float32Array(this.geometryVertexCount * ELEMENTS_PER_VERTEX);
+        this.geometryHostBuffer = new Float32Array(this.geometryVertexCount * this.elementCount);
         this.geometryBuffer = this.device.createBuffer({
-            size: this.geometryVertexCount * ELEMENTS_PER_VERTEX * 4,
+            size: this.geometryVertexCount * this.elementCount * 4,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
         });
 
@@ -71,32 +69,28 @@ export class MultiGeometry extends SceneGraph {
 
     public updateBuffers()
     {
-        this.device.queue.writeBuffer(this.geometryBuffer, 0, this.geometryHostBuffer, 0, this.totalVertexCount * this.geometryHostBuffer.BYTES_PER_ELEMENT * ELEMENTS_PER_VERTEX);
+        this.device.queue.writeBuffer(this.geometryBuffer, 0, this.geometryHostBuffer, 0, this.totalVertexCount * this.geometryHostBuffer.BYTES_PER_ELEMENT * this.elementCount);
         this.device.queue.writeBuffer(this.indexBuffer, 0, this.indexHostBuffer, 0, this.currentIdx * this.indexHostBuffer.BYTES_PER_ELEMENT); 
-        // this.device.queue.writeBuffer(this.geometryBuffer, 0, this.geometryHostBuffer);
-        // this.device.queue.writeBuffer(this.indexBuffer, 0, this.indexHostBuffer);
     }
 
     public drawGeometry(geometryVertexArray: Float32Array, indexArray: Uint16Array)
     {
-        // const map2 = geometryVertexArray.map(x => x + 1);
-        // this.geometryHostBuffer.set(map2, this.totalVertexCount * ELEMENTS_PER_VERTEX);
-        this.geometryHostBuffer.set(geometryVertexArray, this.totalVertexCount * ELEMENTS_PER_VERTEX);
+        this.geometryHostBuffer.set(geometryVertexArray, this.totalVertexCount * this.elementCount);
 
         const map1 = indexArray.map(x => x + this.totalVertexCount);
         this.indexHostBuffer.set(map1, this.currentIdx);
 
-        this.totalVertexCount += geometryVertexArray.length / ELEMENTS_PER_VERTEX;
+        this.totalVertexCount += geometryVertexArray.length / this.elementCount;
         this.currentIdx += indexArray.length;
 
-        this.indexHostBuffer[this.currentIdx] = 0xFFFF;
-        this.currentIdx++;
+        // this.indexHostBuffer[this.currentIdx] = 0xFFFF;
+        // this.currentIdx++;
     }
 
     // public drawGeometryNew(geometryVertexArray: Float32Array)
     // {
-    //     this.geometryHostBuffer.set(geometryVertexArray, this.totalVertexCount * ELEMENTS_PER_VERTEX);
-    //     let currentVertexCount = geometryVertexArray.length / ELEMENTS_PER_VERTEX;
+    //     this.geometryHostBuffer.set(geometryVertexArray, this.totalVertexCount * this.elementCount);
+    //     let currentVertexCount = geometryVertexArray.length / this.elementCount;
     //     let currentIndexCount = currentVertexCount + 1;
     //     for (let i = 0; i < currentIndexCount; i++) { // +1 for 0xFFFF
     //         this.indexHostBuffer[i + this.totalVertexCount] = i + this.totalVertexCount;
@@ -138,7 +132,7 @@ export class MultiGeometry extends SceneGraph {
                 ];
         const geometryBufferDesc: GPUVertexBufferLayout = {
             attributes: positionAttribDesc,
-            arrayStride: vertexSize, /* Float32Array.BYTES_PER_ELEMENT */
+            arrayStride: this.vertexSize, /* Float32Array.BYTES_PER_ELEMENT */
             stepMode: 'vertex'
         };
 
@@ -172,7 +166,7 @@ export class MultiGeometry extends SceneGraph {
         };
 
         // Rasterization
-        const primitive: GPUPrimitiveState = this.isIndexedGeometry ? {
+        const primitive: GPUPrimitiveState = this.isPrimtiveTypeStrip ? {
             frontFace: 'cw',
             cullMode: 'none',
             topology: this.primitiveType,
@@ -220,10 +214,6 @@ export class MultiGeometry extends SceneGraph {
     }
 
     public draw(passEncoder: GPURenderPassEncoder, camera: Camera): void {
-        // this.updateBuffers();
-        // this.resetIndex();
-
-        // draw = (passEncoder: GPURenderPassEncoder, camera: Camera) => {
         passEncoder.setPipeline(this.pipeline);
 
         // MOVE / TRANSLATE OBJECT
