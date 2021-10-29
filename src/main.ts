@@ -7,6 +7,7 @@ import ShapeTest from "./shapetest";
 const binding = new Binding();
 const gui = new Gui(binding);
 let canvas: HTMLCanvasElement;
+let canvasText: HTMLCanvasElement;
 let canvas2: HTMLCanvasElement;
 let camera: GoldenRatio.Camera;
 let camera2: GoldenRatio.Camera;
@@ -56,7 +57,10 @@ window.onload = function(){
 	gui.start(binding);
 
 	canvas = document.getElementById('webgpu-canvas') as HTMLCanvasElement;
+	canvasText = document.getElementById('canvasText') as HTMLCanvasElement;
 	const renderer = new GoldenRatio.Renderer(canvas, binding, 0);
+
+	var ctx = canvasText.getContext("2d");
 
 	renderer.initializeAPI().then((success) => {
 		if (!success) return;
@@ -70,6 +74,8 @@ window.onload = function(){
 
 		const doFrame = () => {
 			renderer.render(scene, camera);
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			ctx.strokeText("Parminder: ", 60.5, 60.5);		
 			requestAnimationFrame(doFrame);
 		};
 		requestAnimationFrame(doFrame);
@@ -116,6 +122,7 @@ window.onload = function(){
 	/***************************CANVAS*********************************/
 	
 	canvas2 = document.getElementById('webgpu-canvas2') as HTMLCanvasElement;
+
 	const renderer2 = new GoldenRatio.Renderer(canvas2, binding, 1);
 	renderer2.initializeAPI().then((success) => {
 		if (!success) return;

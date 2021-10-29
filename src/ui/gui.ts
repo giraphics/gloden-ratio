@@ -80,13 +80,36 @@ export default class Gui {
         canvas.width = 630; // 800
         canvas.height = 640;
 
+        var canvasText = document.createElement("canvas");
+        canvasText.id = 'canvasText';
+        canvasText.width = 630; // 800
+        canvasText.height = 640;
+        canvasText.style.top = '0px'; // Must specify unit.
+        canvasText.style.position = 'absolute'; // Must specify unit.
+        canvasText.style.pointerEvents = 'none';
+		canvasText.times = 0;
+		canvasText.redraw = function() {
+			var rect = canvasText.parentNode.getClientRects()[0];
+            canvasText.width = rect.width > 630 ? 630 : rect.width;
+            canvasText.height = rect.height > 640 ? 640 : rect.height;
+			var ctx = canvasText.getContext("2d");
+			ctx.clearRect(0, 0, this.width, this.height);
+			ctx.lineWidth = 1;
+			ctx.strokeStyle = "#AAF";
+			ctx.strokeRect(1, 1, this.width - 1, this.height - 1);
+			ctx.strokeText("Times: " + this.times, 20.5, 30.5);
+			this.times += 1;
+		}
+		mainarea.onresize = function() { canvas.redraw();canvasText.redraw(); };
+
         canvas.redraw = function() {
 			var rect = canvas.parentNode.getClientRects()[0];
             canvas.width = rect.width > 630 ? 630 : rect.width;
             canvas.height = rect.height > 640 ? 640 : rect.height;
         }
 		
-        mainarea.getSection(0).getSection(0).getSection(0).onresize = function() { canvas.redraw(); };
+        mainarea.getSection(0).getSection(0).getSection(0).onresize = function() { canvas.redraw(); canvasText.redraw();};
+        mainarea.getSection(0).getSection(0).getSection(0).content.appendChild(canvasText);
         mainarea.getSection(0).getSection(0).getSection(0).content.appendChild(canvas);
 
         // Create canvas 2
