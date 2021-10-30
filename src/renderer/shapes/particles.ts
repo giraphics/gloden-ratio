@@ -38,12 +38,7 @@ export class Particles extends SceneGraph {
     private colorBuffer: GPUBuffer;
     private indexBuffer: GPUBuffer;
 
-    // Uniforms 
-    // - Device 
-    private matrixSize = 4 * 16; // 4x4 matrix
-    private offset = 256; // uniformBindGroup offset must be 256-byte aligned
-    private uniformBufferSize = this.offset + this.matrixSize;
-    private uniformBuffer: GPUBuffer;
+    // Uniforms bindings 
     private uniformBindGroup: GPUBindGroup;
 
     private speed: Float32Array;

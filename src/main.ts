@@ -75,7 +75,7 @@ window.onload = function(){
 		const doFrame = () => {
 			renderer.render(scene, camera);
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			ctx.strokeText("Parminder: ", 60.5, 60.5);		
+			ctx.strokeText("Parminder: ", 60.5, 60.5);
 			requestAnimationFrame(doFrame);
 		};
 		requestAnimationFrame(doFrame);
@@ -129,8 +129,8 @@ window.onload = function(){
 
 		const scene2 = new GoldenRatio.Scene();
 		const shapetest = new ShapeTest;
-		//let geometryCount: number = 65536;
-		const customGeom = new GoldenRatio.MultiGeometry(renderer2.device, GoldenRatio.PRIMITIVE_TYPE.TRIANGLE_LIST/*, geometryCount*/);
+		let geometryCount: number = 65536 * 36;
+		const customGeom = new GoldenRatio.MultiGeometry(renderer2.device, GoldenRatio.PRIMITIVE_TYPE.TRIANGLE_LIST, geometryCount);
         scene2.add(customGeom);
 
 		// Camera
@@ -138,10 +138,10 @@ window.onload = function(){
         camera2.z = 12;
 	
 		const doFrame2 = () => {
-			shapetest.drawCubev36(customGeom, 10, 0.1);
-			//shapetest.drawCubev8TriangleList(customGeom, 10, 2);
-			//shapetest.drawCubev8Line(customGeom, 2000, 0.1);
-			//shapetest.drawGrid(customGeom, 1);
+			shapetest.drawCubev36(customGeom, 1500, .2, .2, .2);
+			//shapetest.drawCubev8TriangleList(customGeom, 2000, .2, -.2, .2);
+			// shapetest.drawCubev8Line(customGeom, 10, -.2, .2, .2);
+			// shapetest.drawGrid(customGeom, 1);
 			
 			customGeom.updateBuffers();
 			

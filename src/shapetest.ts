@@ -1,7 +1,7 @@
 import * as GoldenRatio from "./renderer/index";
 
 export default class ShapeTest {
-	public drawCubev36(customGeom: GoldenRatio.MultiGeometry, geometryCount: number, step: number)
+	public drawCubev36(customGeom: GoldenRatio.MultiGeometry, geometryCount: number, stepX: number, stepY: number, stepZ: number)
 	{
 		// 1100 @30FPS
 		const cubeIndexArray = new Uint16Array([
@@ -12,63 +12,65 @@ export default class ShapeTest {
 			24, 25, 26, 27, 28, 29,
 			30, 31, 32, 33, 34, 35,
 		]);
-					
+
 		var delX = 0.0;
 		var delY = 0.0;
+		var delZ = 0.0;
 
 		for (let i = 0; i < geometryCount; i++) {
-			let geometryVertexArray7 = new Float32Array([
+			let geometryVertexArray = new Float32Array([
 				// float4 position, float4 color, float2 uv,
-				1 + delX, -1 + delY, 1, 1,   1, 0, 1, 1,  1, 1,
-				-1 + delX, -1 + delY, 1, 1,  0, 0, 1, 1,  0, 1,
-				-1 + delX, -1 + delY, -1, 1, 0, 0, 0, 1,  0, 0,
-				1 + delX, -1 + delY, -1, 1,  1, 0, 0, 1,  1, 0,
-				1 + delX, -1 + delY, 1, 1,   1, 0, 1, 1,  1, 1,
-				-1 + delX, -1 + delY, -1, 1, 0, 0, 0, 1,  0, 0,
+				1 + delX, -1 + delY, 1 + delZ, 1,   1, 0, 1, 1,  1, 1,
+				-1 + delX, -1 + delY, 1 + delZ, 1,  0, 0, 1, 1,  0, 1,
+				-1 + delX, -1 + delY, -1 + delZ, 1, 0, 0, 0, 1,  0, 0,
+				1 + delX, -1 + delY, -1 + delZ, 1,  1, 0, 0, 1,  1, 0,
+				1 + delX, -1 + delY, 1 + delZ, 1,   1, 0, 1, 1,  1, 1,
+				-1 + delX, -1 + delY, -1 + delZ, 1, 0, 0, 0, 1,  0, 0,
 	
-				1 + delX, 1 + delY, 1, 1,    1, 1, 1, 1,  1, 1,
-				1 + delX, -1 + delY, 1, 1,   1, 0, 1, 1,  0, 1,
-				1 + delX, -1 + delY, -1, 1,  1, 0, 0, 1,  0, 0,
-				1 + delX, 1 + delY, -1, 1,   1, 1, 0, 1,  1, 0,
-				1 + delX, 1 + delY, 1, 1,    1, 1, 1, 1,  1, 1,
-				1 + delX, -1 + delY, -1, 1,  1, 0, 0, 1,  0, 0,
+				1 + delX, 1 + delY, 1 + delZ, 1,    1, 1, 1, 1,  1, 1,
+				1 + delX, -1 + delY, 1 + delZ, 1,   1, 0, 1, 1,  0, 1,
+				1 + delX, -1 + delY, -1 + delZ, 1,  1, 0, 0, 1,  0, 0,
+				1 + delX, 1 + delY, -1 + delZ, 1,   1, 1, 0, 1,  1, 0,
+				1 + delX, 1 + delY, 1 + delZ, 1,    1, 1, 1, 1,  1, 1,
+				1 + delX, -1 + delY, -1 + delZ, 1,  1, 0, 0, 1,  0, 0,
 	
-				-1 + delX, 1 + delY, 1, 1,   0, 1, 1, 1,  1, 1,
-				1 + delX, 1 + delY, 1, 1,    1, 1, 1, 1,  0, 1,
-				1 + delX, 1 + delY, -1, 1,   1, 1, 0, 1,  0, 0,
-				-1 + delX, 1 + delY, -1, 1,  0, 1, 0, 1,  1, 0,
-				-1 + delX, 1 + delY, 1, 1,   0, 1, 1, 1,  1, 1,
-				1 + delX, 1 + delY, -1, 1,   1, 1, 0, 1,  0, 0,
+				-1 + delX, 1 + delY, 1 + delZ, 1,   0, 1, 1, 1,  1, 1,
+				1 + delX, 1 + delY, 1 + delZ, 1,    1, 1, 1, 1,  0, 1,
+				1 + delX, 1 + delY, -1 + delZ, 1,   1, 1, 0, 1,  0, 0,
+				-1 + delX, 1 + delY, -1 + delZ, 1,  0, 1, 0, 1,  1, 0,
+				-1 + delX, 1 + delY, 1 + delZ, 1,   0, 1, 1, 1,  1, 1,
+				1 + delX, 1 + delY, -1 + delZ, 1,   1, 1, 0, 1,  0, 0,
 	
-				-1 + delX, -1 + delY, 1, 1,  0, 0, 1, 1,  1, 1,
-				-1 + delX, 1 + delY, 1, 1,   0, 1, 1, 1,  0, 1,
-				-1 + delX, 1 + delY, -1, 1,  0, 1, 0, 1,  0, 0,
-				-1 + delX, -1 + delY, -1, 1, 0, 0, 0, 1,  1, 0,
-				-1 + delX, -1 + delY, 1, 1,  0, 0, 1, 1,  1, 1,
-				-1 + delX, 1 + delY, -1, 1,  0, 1, 0, 1,  0, 0,
+				-1 + delX, -1 + delY, 1 + delZ, 1,  0, 0, 1, 1,  1, 1,
+				-1 + delX, 1 + delY, 1 + delZ, 1,   0, 1, 1, 1,  0, 1,
+				-1 + delX, 1 + delY, -1 + delZ, 1,  0, 1, 0, 1,  0, 0,
+				-1 + delX, -1 + delY, -1 + delZ, 1, 0, 0, 0, 1,  1, 0,
+				-1 + delX, -1 + delY, 1 + delZ, 1,  0, 0, 1, 1,  1, 1,
+				-1 + delX, 1 + delY, -1 + delZ, 1,  0, 1, 0, 1,  0, 0,
 	
-				1 + delX, 1 + delY, 1, 1,    1, 1, 1, 1,  1, 1,
-				-1 + delX, 1 + delY, 1, 1,   0, 1, 1, 1,  0, 1,
-				-1 + delX, -1 + delY, 1, 1,  0, 0, 1, 1,  0, 0,
-				-1 + delX, -1 + delY, 1, 1,  0, 0, 1, 1,  0, 0,
-				1 + delX, -1 + delY, 1, 1,   1, 0, 1, 1,  1, 0,
-				1 + delX, 1 + delY, 1, 1,    1, 1, 1, 1,  1, 1,
+				1 + delX, 1 + delY, 1 + delZ, 1,    1, 1, 1, 1,  1, 1,
+				-1 + delX, 1 + delY, 1 + delZ, 1,   0, 1, 1, 1,  0, 1,
+				-1 + delX, -1 + delY, 1 + delZ, 1,  0, 0, 1, 1,  0, 0,
+				-1 + delX, -1 + delY, 1 + delZ, 1,  0, 0, 1, 1,  0, 0,
+				1 + delX, -1 + delY, 1 + delZ, 1,   1, 0, 1, 1,  1, 0,
+				1 + delX, 1 + delY, 1 + delZ, 1,    1, 1, 1, 1,  1, 1,
 	
-				1 + delX, -1 + delY, -1, 1,  1, 0, 0, 1,  1, 1,
-				-1 + delX, -1 + delY, -1, 1, 0, 0, 0, 1,  0, 1,
-				-1 + delX, 1 + delY, -1, 1,  0, 1, 0, 1,  0, 0,
-				1 + delX, 1 + delY, -1, 1,   1, 1, 0, 1,  1, 0,
-				1 + delX, -1 + delY, -1, 1,  1, 0, 0, 1,  1, 1,
-				-1 + delX, 1 + delY, -1, 1,  0, 1, 0, 1,  0, 0,
+				1 + delX, -1 + delY, -1 + delZ, 1,  1, 0, 0, 1,  1, 1,
+				-1 + delX, -1 + delY, -1 + delZ, 1, 0, 0, 0, 1,  0, 1,
+				-1 + delX, 1 + delY, -1 + delZ, 1,  0, 1, 0, 1,  0, 0,
+				1 + delX, 1 + delY, -1 + delZ, 1,   1, 1, 0, 1,  1, 0,
+				1 + delX, -1 + delY, -1 + delZ, 1,  1, 0, 0, 1,  1, 1,
+				-1 + delX, 1 + delY, -1 + delZ, 1,  0, 1, 0, 1,  0, 0,
 			]);
-			customGeom.drawGeometry(geometryVertexArray7, cubeIndexArray);
+			customGeom.drawGeometry(geometryVertexArray, cubeIndexArray);
 	
-			delX += step;
-			delY += step;
+			delX += stepX;
+			delY += stepY;
+			delZ += stepZ;
 		}
 	}
 
-	public drawCubev8TriangleList (customGeom: GoldenRatio.MultiGeometry, geometryCount: number, step: number)
+	public drawCubev8TriangleList (customGeom: GoldenRatio.MultiGeometry, geometryCount: number, stepX: number, stepY: number, stepZ: number)
 	{
 		// 5000 @30FPS
 		const cubeIndexArray = new Uint16Array([
@@ -82,29 +84,31 @@ export default class ShapeTest {
 					
 		var delX = 0.0;
 		var delY = 0.0;
+		var delZ = 0.0;
 		
 		for (let i = 0; i < geometryCount; i++) {
 			let geometryVertexArray7 = new Float32Array([
 				// float4 position, float4 color, float2 uv,
-				-1 + delX, -1 + delY, 1, 1,   1, 0, 1, .5,  1, 1,
-				-1 + delX,  1 + delY, 1, 1,  0, 0, 1, .5,  0, 1,
-				1 + delX,  1 + delY, 1, 1,  0, 1, 0, .5,  0, 1,
-				1 + delX, -1 + delY, 1, 1, 1, 0, 0, .5,  0, 0,
+				-1 + delX, -1 + delY, 1 + delZ, 1,   1, 0, 1, .5,  1, 1,
+				-1 + delX,  1 + delY, 1 + delZ, 1,  0, 0, 1, .5,  0, 1,
+				1 + delX,  1 + delY, 1 + delZ, 1,  0, 1, 0, .5,  0, 1,
+				1 + delX, -1 + delY, 1 + delZ, 1, 1, 0, 0, .5,  0, 0,
 
-				-1 + delX, -1 + delY, -1, 1,  1, 1, 0, .5,  1, 0,
-				-1 + delX, 1 + delY, -1, 1,   1, 1, 1, .5,  1, 1,
-				1 + delX, 1 + delY, -1, 1, 0, 1, 1, .5,  0, 0,
-				1 + delX, -1 + delY, -1, 1, 1, 0, 1, .5,  0, 0,
+				-1 + delX, -1 + delY, -1 + delZ, 1,  1, 1, 0, .5,  1, 0,
+				-1 + delX, 1 + delY, -1 + delZ, 1,   1, 1, 1, .5,  1, 1,
+				1 + delX, 1 + delY, -1 + delZ, 1, 0, 1, 1, .5,  0, 0,
+				1 + delX, -1 + delY, -1 + delZ, 1, 1, 0, 1, .5,  0, 0,
 			]);
 
 			customGeom.drawGeometry(geometryVertexArray7, cubeIndexArray);
 	
-			delX += step;
-			delY += step;
+			delX += stepX;
+			delY += stepY;
+			delZ += stepZ;
 		}
 	}
 
-	public drawCubev8Line (customGeom: GoldenRatio.MultiGeometry, geometryCount: number, step: number)
+	public drawCubev8Line (customGeom: GoldenRatio.MultiGeometry, geometryCount: number, stepX: number, stepY: number, stepZ: number)
 	{
 		// 5000 @30FPS
 		const cubeIndexArray = new Uint16Array([
@@ -126,25 +130,27 @@ export default class ShapeTest {
 					
 		var delX = 0.0;
 		var delY = 0.0;
+		var delZ = 0.0;
 		
 		for (let i = 0; i < geometryCount; i++) {
 			let geometryVertexArray7 = new Float32Array([
 				// float4 position, float4 color, float2 uv,
-				-1 + delX, -1 + delY, 1, 1, 1, 0, 1, 1, 1, 1,
-				-1 + delX,  1 + delY, 1, 1, 0, 0, 1, 1, 0, 1,
-				1 + delX,  1 + delY, 1, 1, 0, 1, 0, 1, 0, 1,
-				1 + delX, -1 + delY, 1, 1, 1, 0, 0, 1, 0, 0,
+				-1 + delX, -1 + delY, 1 + delZ, 1, 1, 0, 1, 1, 1, 1,
+				-1 + delX,  1 + delY, 1 + delZ, 1, 0, 0, 1, 1, 0, 1,
+				1 + delX,  1 + delY, 1 + delZ, 1, 0, 1, 0, 1, 0, 1,
+				1 + delX, -1 + delY, 1 + delZ, 1, 1, 0, 0, 1, 0, 0,
 
-				-1 + delX, -1 + delY, -1, 1, 1, 1, 0, 1, 1, 0,
-				-1 + delX, 1 + delY, -1, 1, 1, 1, 1, 1, 1, 1,
-				1 + delX, 1 + delY, -1, 1, 0, 1, 1, 1, 0, 0,
-				1 + delX, -1 + delY, -1, 1, 1, 0, 1, 1, 0, 0,
+				-1 + delX, -1 + delY, -1 + delZ, 1, 1, 1, 0, 1, 1, 0,
+				-1 + delX, 1 + delY, -1 + delZ, 1, 1, 1, 1, 1, 1, 1,
+				1 + delX, 1 + delY, -1 + delZ, 1, 0, 1, 1, 1, 0, 0,
+				1 + delX, -1 + delY, -1 + delZ, 1, 1, 0, 1, 1, 0, 0,
 			]);
 
 			customGeom.drawGeometry(geometryVertexArray7, cubeIndexArray);
 	
-			delX += step;
-			delY += step;
+			delX += stepX;
+			delY += stepY;
+			delZ += stepZ;
 		}
 	}
 
