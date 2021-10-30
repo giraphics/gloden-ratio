@@ -28,14 +28,6 @@ export class MultiGeometry extends SceneGraph {
     private uniformBuffer: GPUBuffer;
     private uniformBindGroup: GPUBindGroup;
 
-    // - Host
-    private modelViewProjectionMatrix = mat4.create() as Float32Array;
-
-    // Model
-    private rotX: number;
-    private rotY: number;
-    private rotZ: number;
-
     constructor(device: GPUDevice, primitiveType: PRIMITIVE_TYPE, vertexUppperLimit?: number) {
         // presently type info is 10 elements fixed vertex 4, color 4, uv 2
         super(primitiveType, /*typeInfo*/ [TYPE_SIZE.float32x4, TYPE_SIZE.float32x4, TYPE_SIZE.float32x2]);
@@ -44,10 +36,6 @@ export class MultiGeometry extends SceneGraph {
         if (vertexUppperLimit) {
             this.vertexUppperLimit = vertexUppperLimit;
         }
-
-        this.rotX = 0.0;
-        this.rotY = 0.0;
-        this.rotZ = 0.0;
 
         this.geometryHostBuffer = new Float32Array(this.vertexUppperLimit * this.elementCount);
         this.geometryBuffer = this.device.createBuffer({
@@ -142,25 +130,15 @@ export class MultiGeometry extends SceneGraph {
         const colorState: GPUColorTargetState = {
             format: 'bgra8unorm',
             blend: {
-                // color: {
-                //   srcFactor: "src-alpha",
-                //   dstFactor: "one-minus-src-alpha",
-                //   operation: "add"
-                // },
-                // alpha: {
-                //     srcFactor: "src-alpha",
-                //     dstFactor: "one",
-                //     operation: "add"
-                // }
                 color: {
                   srcFactor: "src-alpha",
                   dstFactor: "one-minus-src-alpha",
                   operation: "add"
                 },
                 alpha: {
-                  srcFactor: "src-alpha",
-                  dstFactor: "one-minus-src-alpha",
-                  operation: "add"
+                    srcFactor: "src-alpha",
+                    dstFactor: "one"/*"one-minus-src-alpha"*/,
+                    operation: "add"
                 }
               }
           };
@@ -220,25 +198,9 @@ export class MultiGeometry extends SceneGraph {
     }
 
     public draw(passEncoder: GPURenderPassEncoder, camera: Camera): void {
+        super.draw(passEncoder, camera);
+        
         passEncoder.setPipeline(this.pipeline);
-
-        // MOVE / TRANSLATE OBJECT
-        const modelMatrix = mat4.create();
-        mat4.translate(modelMatrix, modelMatrix, vec3.fromValues(0, 0, -0.1));
-        // mat4.rotateX(modelMatrix, modelMatrix, this.rotY);
-        // mat4.rotateY(modelMatrix, modelMatrix, this.rotY);
-        // mat4.rotateZ(modelMatrix, modelMatrix, this.rotY);
-        // this.rotY += 0.01;
-        // if (this.rotY > 3.14)
-        //     this.rotY = 0.0;
-        // this.indexHostBuffer[this.currentIdx] = 0xFFFF;
-        // this.currentIdx++;
-        // this.indexHostBuffer[this.currentIdx] = 0xFFFF;
-        // this.currentIdx++;
-
-
-        // PROJECT ON CAMERA
-        mat4.multiply(this.modelViewProjectionMatrix, camera.getCameraViewProjMatrix(), modelMatrix);
         
         this.device.queue.writeBuffer(
             this.uniformBuffer,

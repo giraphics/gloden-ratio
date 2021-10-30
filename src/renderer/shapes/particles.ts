@@ -46,14 +46,6 @@ export class Particles extends SceneGraph {
     private uniformBuffer: GPUBuffer;
     private uniformBindGroup: GPUBindGroup;
 
-    // - Host
-    private modelViewProjectionMatrix = mat4.create() as Float32Array;
-
-    // Model
-    private rotX: number;
-    private rotY: number;
-    private rotZ: number;
-
     private speed: Float32Array;
     private position: Float32Array;
     private color: Float32Array;
@@ -64,10 +56,6 @@ export class Particles extends SceneGraph {
         this.device = device;
         this.primitive = primitive;
         this.binding = binding;
-
-        this.rotX = 0.0;
-        this.rotY = 0.0;
-        this.rotZ = 0.0;
 
         this.allocate();
     }
@@ -250,22 +238,10 @@ export class Particles extends SceneGraph {
 
     // draw = (passEncoder: GPURenderPassEncoder, camera: Camera) => {
     public draw(passEncoder: GPURenderPassEncoder, camera: Camera): void {
+        super.draw(passEncoder, camera);
         this.update(); // Updathis.camerathis.camerathis.camerathis.camerate the position first
 
         passEncoder.setPipeline(this.pipeline);
-
-        // MOVE / TRANSLATE OBJECT
-        const modelMatrix = mat4.create();
-        mat4.translate(modelMatrix, modelMatrix, vec3.fromValues(0, 0, -0.1));
-        // mat4.rotateX(modelMatrix, modelMatrix, this.rotY);
-        // mat4.rotateY(modelMatrix, modelMatrix, this.rotY);
-        // mat4.rotateZ(modelMatrix, modelMatrix, this.rotY);
-        // this.rotY += 0.01;
-        // if (this.rotY > 3.14)
-        //     this.rotY = 0.0;
-
-        // PROJECT ON CAMERA
-        mat4.multiply(this.modelViewProjectionMatrix, camera.getCameraViewProjMatrix(), modelMatrix);
         
         this.device.queue.writeBuffer(
             this.uniformBuffer,

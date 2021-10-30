@@ -85,24 +85,12 @@ export class CubeObject extends SceneGraph {
     private uniformBuffer: GPUBuffer;
     private uniformBindGroup: GPUBindGroup;
 
-    // - Host
-    private modelViewProjectionMatrix = mat4.create() as Float32Array;
-
-    // Model
-    private rotX: number;
-    private rotY: number;
-    private rotZ: number;
-
     constructor(device: GPUDevice, primitive: Number, binding: Binding, primitiveType: PRIMITIVE_TYPE) {
         super(primitiveType);
         
         this.device = device;
         this.primitive = primitive;
         this.binding = binding;
-
-        this.rotX = 0.0;
-        this.rotY = 0.0;
-        this.rotZ = 0.0;
 
         this.allocate();
     }
@@ -220,21 +208,8 @@ export class CubeObject extends SceneGraph {
     }
 
     public draw(passEncoder: GPURenderPassEncoder, camera: Camera): void {
-        // draw = (passEncoder: GPURenderPassEncoder, camera: Camera) => {
+        super.draw(passEncoder, camera);
         passEncoder.setPipeline(this.pipeline);
-
-        // MOVE / TRANSLATE OBJECT
-        const modelMatrix = mat4.create();
-        mat4.translate(modelMatrix, modelMatrix, vec3.fromValues(0, 0, -0.1));
-        // mat4.rotateX(modelMatrix, modelMatrix, this.rotY);
-        // mat4.rotateY(modelMatrix, modelMatrix, this.rotY);
-        // mat4.rotateZ(modelMatrix, modelMatrix, this.rotY);
-        // this.rotY += 0.01;
-        // if (this.rotY > 3.14)
-        //     this.rotY = 0.0;
-
-        // PROJECT ON CAMERA
-        mat4.multiply(this.modelViewProjectionMatrix, camera.getCameraViewProjMatrix(), modelMatrix);
         
         this.device.queue.writeBuffer(
             this.uniformBuffer,
