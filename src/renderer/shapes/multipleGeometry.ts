@@ -1,12 +1,13 @@
-import vertShaderCode from './shaders/cube.vert.wgsl';
-import fragShaderCode from './shaders/cube.frag.wgsl';
+import vertShaderCode from './shaders/geometry.vert.wgsl';
+import fragShaderCode from './shaders/geometry.frag.wgsl';
 import { Camera } from './../renderer/camera';
 import SceneGraph from './../base/scenegraph';
 import {PRIMITIVE_TYPE, TYPE_SIZE} from './../renderer/constants';
 
 export class MultiGeometry extends SceneGraph {
     private geometryIndexCount: number = 0;
-    private vertexUppperLimit: number = 65536; // Max of index
+    private vertexUppperLimit: number = 65536;
+    private indexUppperLimit: number = 65536; // Max of index
     private totalVertexCount: number = 0;
     private currentIdx: number = 0;
     private geometryHostBuffer: Float32Array;
@@ -37,7 +38,7 @@ export class MultiGeometry extends SceneGraph {
         });
       
 //        this.geometryIndexCount = this.vertexUppperLimit * 2;
-        this.geometryIndexCount = 65536;
+        this.geometryIndexCount = this.indexUppperLimit;
         let idxSize = (this.geometryIndexCount * 2 + 3) & ~3;
         this.indexHostBuffer = new Uint16Array(idxSize / 2);
         this.indexBuffer = this.device.createBuffer({
@@ -84,7 +85,7 @@ export class MultiGeometry extends SceneGraph {
             this.indexHostBuffer[this.currentIdx] = 0xFFFF;
             this.currentIdx++;
         }
-      }
+    }
 
     public initialize()
     {

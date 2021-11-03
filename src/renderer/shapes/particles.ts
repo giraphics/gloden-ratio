@@ -1,5 +1,5 @@
-import vertShaderCode from './shaders/triangle.vert.wgsl';
-import fragShaderCode from './shaders/triangle.frag.wgsl';
+import vertShaderCode from './shaders/pointcloud.vert.wgsl';
+import fragShaderCode from './shaders/pointcloud.frag.wgsl';
 import { mat4, vec3 } from 'gl-matrix';
 import Binding from '../../binder/binding';
 import { Camera } from './../renderer/camera';
