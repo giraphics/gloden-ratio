@@ -231,7 +231,6 @@ export class Particles extends SceneGraph {
         }
     }
 
-    // draw = (passEncoder: GPURenderPassEncoder, camera: Camera) => {
     public draw(passEncoder: GPURenderPassEncoder, camera: Camera): void {
         super.draw(passEncoder, camera);
         this.update(); // Updathis.camerathis.camerathis.camerathis.camerate the position first

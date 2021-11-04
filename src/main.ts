@@ -129,7 +129,7 @@ window.onload = function(){
 
 		const scene2 = new GoldenRatio.Scene();
 		const shapetest = new ShapeTest;
-		let geometryCount: number = 360;
+		let geometryCount: number = 36;
 		const customGeom = new GoldenRatio.MultiGeometry(renderer2.device, GoldenRatio.PRIMITIVE_TYPE.TRIANGLE_LIST, geometryCount);
         scene2.add(customGeom);
 
@@ -140,7 +140,7 @@ window.onload = function(){
 		let gc = 1;
 		const doFrame2 = () => {
 			shapetest.drawCubev36(customGeom, Math.floor(gc), .2, .2, .2);
-			gc += 0.01;
+			gc += 1;
 			//shapetest.drawCubev8TriangleList(customGeom, 2000, .2, -.2, .2);
 			// shapetest.drawCubev8Line(customGeom, 10, -.2, .2, .2);
 			// shapetest.drawGrid(customGeom, 1);
@@ -148,7 +148,6 @@ window.onload = function(){
 			customGeom.updateBuffers();
 			
 			renderer2.render(scene2, camera2);
-			customGeom.resetIndex();
 			requestAnimationFrame(doFrame2);
 		};
 		requestAnimationFrame(doFrame2);

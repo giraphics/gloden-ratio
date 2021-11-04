@@ -8,11 +8,12 @@ export class MultiGeometry extends SceneGraph {
     private geometryIndexCount: number = 0;
     private vertexUppperLimit: number = 65536;
     private indexUppperLimit: number = 65536; // Max of index
-    private totalVertexCount: number = 0;
-    private currentIdx: number = 0;
     private geometryHostBuffer: Float32Array;
     private indexHostBuffer: Uint16Array;
     private deviceBufferSize: number = 0;
+    protected totalVertexCount: number = 0;
+    protected currentIdx: number = 0;
+    protected isDirty: Boolean = false;
 
     // Resources
     private geometryBuffer: GPUBuffer;
@@ -30,12 +31,7 @@ export class MultiGeometry extends SceneGraph {
             this.vertexUppperLimit = vertexUppperLimit;
         }
 
-        this.geometryHostBuffer = new Float32Array(/*this.vertexUppperLimit*/65536 * 36 * this.elementCount);
-        this.deviceBufferSize = this.vertexUppperLimit * this.elementCount * this.geometryHostBuffer.BYTES_PER_ELEMENT;
-        this.geometryBuffer = this.device.createBuffer({
-            size: this.deviceBufferSize,
-            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-        });
+        this.allocateBuffersIfNeeded(this.vertexUppperLimit);
       
 //        this.geometryIndexCount = this.vertexUppperLimit * 2;
         this.geometryIndexCount = this.indexUppperLimit;
@@ -48,21 +44,34 @@ export class MultiGeometry extends SceneGraph {
 
         this.initialize();
     }
+    
+    private allocateBuffersIfNeeded(verterCount: number) {
+        let BYTES_PER_ELEMENT = 4;
+        let geometrySize = verterCount * BYTES_PER_ELEMENT * this.elementCount;
+        if (this.deviceBufferSize * 0.25 <= geometrySize) {
+            
+            console.log("Available Size: " + this.deviceBufferSize + "Required Size: " + geometrySize);
+            this.deviceBufferSize =  (this.deviceBufferSize == 0) ? verterCount * this.elementCount * BYTES_PER_ELEMENT * 2 : this.deviceBufferSize * 2;
+            if (this.geometryBuffer) this.geometryBuffer.destroy();
+            this.geometryBuffer = this.device.createBuffer({
+                size: this.deviceBufferSize,
+                usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+            });
+
+            // verterCount *= 1.5;
+
+            // this.geometryHostBuffer = new Float32Array(verterCount * this.elementCount);
+            this.geometryHostBuffer = null;
+            this.geometryHostBuffer = new Float32Array(this.deviceBufferSize / BYTES_PER_ELEMENT);
+
+            console.log("Allocating... " + this.deviceBufferSize);
+        }
+    }
 
     public updateBuffers()
     {
-        let geometrySize = this.totalVertexCount * this.geometryHostBuffer.BYTES_PER_ELEMENT * this.elementCount;
-        if (this.deviceBufferSize * 0.5 <= geometrySize) {
-            console.log("Available Size: " + this.deviceBufferSize + "Required Size: " + geometrySize);
-            this.deviceBufferSize *= 2;
-            this.geometryBuffer.destroy();
-            this.geometryBuffer = this.device.createBuffer({
-              size: this.deviceBufferSize,
-              usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-            });
-        
-            console.log("Allocating... " + this.deviceBufferSize);
-        }
+        this.isDirty = true;
+        this.allocateBuffersIfNeeded(this.totalVertexCount);
 
         this.device.queue.writeBuffer(this.geometryBuffer, 0, this.geometryHostBuffer, 0, this.totalVertexCount * this.geometryHostBuffer.BYTES_PER_ELEMENT * this.elementCount);
         this.device.queue.writeBuffer(this.indexBuffer, 0, this.indexHostBuffer, 0, this.currentIdx * this.indexHostBuffer.BYTES_PER_ELEMENT);
@@ -78,13 +87,17 @@ export class MultiGeometry extends SceneGraph {
         // console.log("---------------------------------------");
         // console.log(this.totalVertexCount * this.geometryHostBuffer.BYTES_PER_ELEMENT * this.elementCount);
         // console.log(this.vertexUppperLimit* this.geometryHostBuffer.BYTES_PER_ELEMENT * this.elementCount);
-        // console.log(this.totalVertexCount);
         // console.log(this.currentIdx);
 
         if (this.isPrimtiveTypeStrip){
             this.indexHostBuffer[this.currentIdx] = 0xFFFF;
             this.currentIdx++;
         }
+    }
+
+    public resetIndex(): void {
+        this.totalVertexCount = 0;
+        this.currentIdx = 0;
     }
 
     public initialize()
@@ -108,11 +121,6 @@ export class MultiGeometry extends SceneGraph {
         });
     }
 
-    public resetIndex(): void {
-        this.totalVertexCount = 0;
-        this.currentIdx = 0;
-    }
-
     public draw(passEncoder: GPURenderPassEncoder, camera: Camera): void {
         super.draw(passEncoder, camera);
         
@@ -130,5 +138,23 @@ export class MultiGeometry extends SceneGraph {
         passEncoder.setBindGroup(0, this.uniformBindGroup);
         passEncoder.setIndexBuffer(this.indexBuffer, 'uint16');
         passEncoder.drawIndexed(this.currentIdx, 1);
+        //console.log(this.totalVertexCount);
+        console.log(this.currentIdx);
+
+        if (this.isDirty) {
+            this.resetIndex();
+        }
+    }
+}
+
+export class StaticGeometry extends MultiGeometry {
+    constructor(device: GPUDevice, primitiveType: PRIMITIVE_TYPE, vertexUppperLimit?: number) {
+        super(device, primitiveType, vertexUppperLimit);
+    }
+}
+
+export class DynamicGeometry extends MultiGeometry {
+    constructor(device: GPUDevice, primitiveType: PRIMITIVE_TYPE, vertexUppperLimit?: number) {
+        super(device, primitiveType, vertexUppperLimit);
     }
 }
