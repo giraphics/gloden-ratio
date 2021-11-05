@@ -129,9 +129,10 @@ window.onload = function(){
 
 		const scene2 = new GoldenRatio.Scene();
 		const shapetest = new ShapeTest;
-		let geometryCount: number = 36;
-		const customGeom = new GoldenRatio.MultiGeometry(renderer2.device, GoldenRatio.PRIMITIVE_TYPE.TRIANGLE_LIST, geometryCount);
-        scene2.add(customGeom);
+		const trianglePainter = new GoldenRatio.MultiGeometry(renderer2.device, GoldenRatio.PRIMITIVE_TYPE.TRIANGLE_LIST);
+		const linePainter = new GoldenRatio.MultiGeometry(renderer2.device, GoldenRatio.PRIMITIVE_TYPE.LINE_LIST);
+        scene2.add(trianglePainter);
+        scene2.add(linePainter);
 
 		// Camera
 		camera2 = new GoldenRatio.Camera(canvas.width / canvas.height);
@@ -139,16 +140,17 @@ window.onload = function(){
 	
 		let gc = 1;
 		const doFrame2 = () => {
-			shapetest.drawCubev36(customGeom, Math.floor(gc), .2, .2, .2);
-			gc += 1;
-			//shapetest.drawCubev8TriangleList(customGeom, 2000, .2, -.2, .2);
-			// shapetest.drawCubev8Line(customGeom, 10, -.2, .2, .2);
-			// shapetest.drawGrid(customGeom, 1);
+			shapetest.drawCubev36(trianglePainter, 1000/*Math.floor(gc)*/, .2, .2, .2);
+			shapetest.drawCubev8TriangleList(trianglePainter, 1000/*Math.floor(gc)*/, .2, -.2, .2);
+			shapetest.drawCubev8Line(linePainter, 10, -.2, .2, .2);
+			shapetest.drawGrid(linePainter, 1);
 			
-			customGeom.updateBuffers();
+			trianglePainter.updateBuffers();
+			linePainter.updateBuffers();
 			
 			renderer2.render(scene2, camera2);
 			requestAnimationFrame(doFrame2);
+			gc += 1;
 		};
 		requestAnimationFrame(doFrame2);
 	});

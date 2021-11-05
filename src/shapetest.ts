@@ -4,7 +4,7 @@ export default class ShapeTest {
 	public drawCubev36(customGeom: GoldenRatio.MultiGeometry, geometryCount: number, stepX: number, stepY: number, stepZ: number)
 	{
 		// 1100 @30FPS
-		const cubeIndexArray = new Uint16Array([
+		const cubeIndexArray = new Uint32Array([
 			0, 1, 2, 3, 4, 5,
 			6, 7, 8, 9, 10, 11,
 			12, 13, 14, 15, 16, 17,
@@ -73,7 +73,7 @@ export default class ShapeTest {
 	public drawCubev8TriangleList (customGeom: GoldenRatio.MultiGeometry, geometryCount: number, stepX: number, stepY: number, stepZ: number)
 	{
 		// 5000 @30FPS
-		const cubeIndexArray = new Uint16Array([
+		const cubeIndexArray = new Uint32Array([
 			0,3,1, 3,2,1,
 			7,4,6, 4,5,6,
 			4,0,5, 0,1,5,
@@ -111,7 +111,7 @@ export default class ShapeTest {
 	public drawCubev8Line (customGeom: GoldenRatio.MultiGeometry, geometryCount: number, stepX: number, stepY: number, stepZ: number)
 	{
 		// 5000 @30FPS
-		const cubeIndexArray = new Uint16Array([
+		const cubeIndexArray = new Uint32Array([
 			0, 1,
 			1, 2,
 			2, 3,
@@ -177,7 +177,7 @@ export default class ShapeTest {
 		}
 
 		let vertexGrid = new Float32Array(interleaveData);
-		let idxGrid = new Uint16Array(idxData);
+		let idxGrid = new Uint32Array(idxData);
 							 
 		for (let i = 0; i < geometryCount; i++) {
 			customGeom.drawGeometry(vertexGrid, idxGrid);
