@@ -5,8 +5,10 @@ import SceneGraph from './../base/scenegraph';
 import {PRIMITIVE_TYPE, TYPE_SIZE} from './../renderer/constants';
 
 export class MultiGeometry extends SceneGraph {
-    private vertexUppperLimit: number = 150000; // Possible upper limit: 26843545
-    private indexUppperLimit: number = 0xFFFFF; // Max of index, 
+    private vertexUppperLimit: number = 0xFFFFFFFF; // Possible upper limit: 26843545
+    private indexUppperLimit: number = 0xFFFFFFFF; // Max of index, 
+    private vertexInitLimit: number = 150000; // Possible upper limit: 26843545
+    private indexInitLimit: number = 0xFFFFF; // Max of index, 
     protected totalVertexCount: number = 0;
     protected totalIndexCount: number = 0;
     protected isDirty: Boolean = false;
@@ -34,11 +36,11 @@ export class MultiGeometry extends SceneGraph {
         
         this.device = device;
         if (vertexUppperLimit) {
-            this.vertexUppperLimit = vertexUppperLimit;
+            this.vertexInitLimit = vertexUppperLimit;
         }
 
-        this.allocateVertexBuffersIfNeeded(this.vertexUppperLimit);
-        this.allocateIndexBuffersIfNeeded(this.indexUppperLimit);
+        this.allocateVertexBuffersIfNeeded(this.vertexInitLimit);
+        this.allocateIndexBuffersIfNeeded(this.indexInitLimit);
       
         this.initialize();
     }
@@ -123,7 +125,7 @@ export class MultiGeometry extends SceneGraph {
     }
 
     public resetIndex(): void {
-        this.isMemoryQuotaExausted = (this.totalIndexCount >= this.indexUppperLimit);
+        this.isMemoryQuotaExausted = (this.totalIndexCount >= this.indexUppperLimit) && (this.totalVertexCount >= this.vertexUppperLimit);
         
         if (!this.isMemoryQuotaExausted) {
             this.totalVertexCount = 0;

@@ -12,46 +12,6 @@ let canvas2: HTMLCanvasElement;
 let camera: GoldenRatio.Camera;
 let camera2: GoldenRatio.Camera;
 
-var mouseHandling = function(canva: HTMLCanvasElement, cam: GoldenRatio.Camera){
-	// ZOOM
-    canva.onwheel = (event: WheelEvent) => {
-		cam.z += event.deltaY / 100
-	}
-
-	// MOUSE DRAG
-	var mouseDown = false;
-	canva.onmousedown = (event: MouseEvent) => {
-		mouseDown = true;
-
-		lastMouseX = event.pageX;
-		lastMouseY = event.pageY;
-	}
-	canva.onmouseup = (event: MouseEvent) => {
-		mouseDown = false;
-	}
-	var lastMouseX=-1; 
-	var lastMouseY=-1;
-	canva.onmousemove = (event: MouseEvent) => {
-		if (!mouseDown) {
-			return;
-		}
-
-		var mousex = event.pageX;
-		var mousey = event.pageY;
-
-		if (lastMouseX > 0 && lastMouseY > 0) {
-			const roty = mousex - lastMouseX;
-			const rotx = mousey - lastMouseY;
-
-			cam.rotY += roty / 100;
-			cam.rotX += rotx / 100;
-		}
-
-		lastMouseX = mousex;
-		lastMouseY = mousey;
-	}	
-}
-
 window.onload = function(){
 	// [Important] Let the GUI be executed first to create the canvas
 	gui.start(binding);
@@ -66,16 +26,25 @@ window.onload = function(){
 		if (!success) return;
 
 		const scene = new GoldenRatio.Scene();
+		const shapetest = new ShapeTest;
+		const linePainter = new GoldenRatio.MultiGeometry(renderer.device, GoldenRatio.PRIMITIVE_TYPE.LINE_LIST);
 		scene.add(new GoldenRatio.Particles(renderer.device, renderer.primitive, renderer.binding, GoldenRatio.PRIMITIVE_TYPE.POINT_LIST));
+		scene.add(linePainter);
 	
 		// Camera
 		camera = new GoldenRatio.Camera(canvas.width/ canvas.height);
         camera.z = 2;
-
+		ctx.font = '50px serif';
+//		ctx.font = 'Bold 30px Sans-Serif';
+		ctx.fillStyle = 'red';
 		const doFrame = () => {
+			shapetest.drawGrid(linePainter, 1);
+			
+			linePainter.updateBuffers();
+
 			renderer.render(scene, camera);
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			ctx.strokeText("Parminder: ", 60.5, 60.5);
+			ctx.fillText("Parminder: ", 60, 500);
 			requestAnimationFrame(doFrame);
 		};
 		requestAnimationFrame(doFrame);
