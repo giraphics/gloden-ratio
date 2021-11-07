@@ -11,6 +11,48 @@ let canvasText: HTMLCanvasElement;
 let canvas2: HTMLCanvasElement;
 let camera: GoldenRatio.Camera;
 let camera2: GoldenRatio.Camera;
+var time = 0;
+
+const renderOverlay = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
+	/************ Render Text ******************/
+	var w = canvas.width;
+	var h = canvas.height;
+	time += 0.01;
+
+	ctx.clearRect(0, 0, w, h);
+	ctx.fillText("Parminder1: ", 60, 500);
+
+	ctx.strokeStyle = "green";
+
+	/************ Render graph ******************/
+	var num = w * 0.25;
+	ctx.beginPath();
+	for(var i = 0; i < num; i++)
+	{
+		var x = (i / num) * w;
+		ctx.moveTo( x * 0.5 , h * 0.9 );
+		ctx.lineTo( x* 0.5, h * 0.9 + h * 0.2 * (Math.sin(((i/num)) * 10 + time) * 0.5 ));
+	}
+	ctx.stroke();
+
+	/************ Bezier Curve *****************/
+	ctx.strokeStyle = "red";
+	ctx.beginPath();
+	ctx.moveTo( w*(Math.sin(time)*0.5+0.5) , h*0.2 );
+	ctx.bezierCurveTo( w*0.4, h*0.9, w*0.8, h*0.3, w*0.8, h*0.8 );
+	ctx.stroke();
+
+	/************ Rotation Curve *****************/
+	ctx.save();
+	ctx.translate(w * 0.9, h * 0.9);
+	ctx.rotate( time );
+	ctx.lineWidth = 10;
+	ctx.beginPath();
+	ctx.rect(-25, -25, 50, 50);
+	ctx.stroke();
+	ctx.strokeRect(-50, -50, 100, 100);
+	ctx.restore();
+}
 
 window.onload = function(){
 	// [Important] Let the GUI be executed first to create the canvas
@@ -35,7 +77,6 @@ window.onload = function(){
 		camera = new GoldenRatio.Camera(canvas.width/ canvas.height);
         camera.z = 2;
 		ctx.font = '50px serif';
-//		ctx.font = 'Bold 30px Sans-Serif';
 		ctx.fillStyle = 'red';
 		const doFrame = () => {
 			shapetest.drawGrid(linePainter, 1);
@@ -43,8 +84,9 @@ window.onload = function(){
 			linePainter.updateBuffers();
 
 			renderer.render(scene, camera);
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			ctx.fillText("Parminder: ", 60, 500);
+
+			renderOverlay(ctx, canvas);
+
 			requestAnimationFrame(doFrame);
 		};
 		requestAnimationFrame(doFrame);
