@@ -12,6 +12,7 @@ let canvas2: HTMLCanvasElement;
 let camera: GoldenRatio.Camera;
 let camera2: GoldenRatio.Camera;
 var time = 0;
+let img : Image;
 
 const renderOverlay = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
 	/************ Render Text ******************/
@@ -35,8 +36,10 @@ const renderOverlay = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement)
 	}
 	ctx.stroke();
 
+	ctx.drawImage(img, w * 0.6, h * 0.8, 100, 100);
+
 	/************ Bezier Curve *****************/
-	ctx.strokeStyle = "red";
+	ctx.strokeStyle = '#ff00f0';
 	ctx.beginPath();
 	ctx.moveTo( w*(Math.sin(time)*0.5+0.5) , h*0.2 );
 	ctx.bezierCurveTo( w*0.4, h*0.9, w*0.8, h*0.3, w*0.8, h*0.8 );
@@ -72,6 +75,9 @@ window.onload = function(){
 		const linePainter = new GoldenRatio.MultiGeometry(renderer.device, GoldenRatio.PRIMITIVE_TYPE.LINE_LIST);
 		scene.add(new GoldenRatio.Particles(renderer.device, renderer.primitive, renderer.binding, GoldenRatio.PRIMITIVE_TYPE.POINT_LIST));
 		scene.add(linePainter);
+
+		img = new Image(100, 200); // width, height
+		img.src = "../data/images/steering-wheel-car.svg";
 	
 		// Camera
 		camera = new GoldenRatio.Camera(canvas.width/ canvas.height);

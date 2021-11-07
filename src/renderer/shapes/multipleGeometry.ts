@@ -172,7 +172,7 @@ export class MultiGeometry extends SceneGraph {
         passEncoder.setIndexBuffer(this.indexBuffer, 'uint32');
         passEncoder.drawIndexed(this.totalIndexCount, 1);
         //console.log(this.totalVertexCount);
-        console.log(this.totalIndexCount);
+        //console.log(this.totalIndexCount);
 
         if (this.isDirty) {
             this.resetIndex();
