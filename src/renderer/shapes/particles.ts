@@ -6,6 +6,36 @@ import { Camera } from './../renderer/camera';
 import SceneGraph from './../base/scenegraph';
 import {PRIMITIVE_TYPE, TYPE_SIZE} from './../renderer/constants';
 
+const particleShaders = {
+  vertex: `
+    [[block]] struct Uniforms {
+      modelViewProjectionMatrix : mat4x4<f32>;
+    };
+    [[binding(0), group(0)]] var<uniform> uniforms : Uniforms;
+
+    struct VSOut {
+        [[builtin(position)]] Position: vec4<f32>;
+        [[location(0)]] color: vec3<f32>;
+    };
+
+    [[stage(vertex)]]
+    fn main([[location(0)]] inPos: vec3<f32>,
+            [[location(1)]] inColor: vec3<f32>) -> VSOut {
+        var vsOut: VSOut;
+        vsOut.Position = uniforms.modelViewProjectionMatrix * vec4<f32>(inPos, 1.0);
+        vsOut.color = inColor;
+        return vsOut;
+    }
+  `,
+  fragment: `
+    [[stage(fragment)]]
+    fn main([[location(0)]] inColor: vec3<f32>) -> [[location(0)]] vec4<f32> {
+        return vec4<f32>(inColor, 1.0);
+    }
+  `,
+};
+
+// TODO[Parminder]: Support SPIR-V shaders
 const vertexShaderGLSL = `
 	#version 450
     layout(location = 0) in vec4 position;
@@ -94,12 +124,14 @@ export class Particles extends SceneGraph {
 
         // Shaders
         const vsmDesc = {
-            code: vertShaderCode
+            // code: vertShaderCode
+            code: particleShaders.vertex
         };
         this.vertModule = this.device.createShaderModule(vsmDesc);
 
         const fsmDesc = {
-            code: fragShaderCode
+            // code: fragShaderCode
+            code: particleShaders.fragment
         };
         this.fragModule = this.device.createShaderModule(fsmDesc);
 

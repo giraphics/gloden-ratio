@@ -4,6 +4,35 @@ import { Camera } from './../renderer/camera';
 import SceneGraph from './../base/scenegraph';
 import {PRIMITIVE_TYPE, TYPE_SIZE} from './../renderer/constants';
 
+const geometryShaders = {
+  vertex: `
+    [[block]] struct Uniforms {
+      modelViewProjectionMatrix : mat4x4<f32>;
+    };
+    [[binding(0), group(0)]] var<uniform> uniforms : Uniforms;
+
+    struct VSOut {
+        [[builtin(position)]] Position: vec4<f32>;
+        [[location(0)]] color: vec4<f32>;
+    };
+
+    [[stage(vertex)]]
+    fn main([[location(0)]] inPos: vec4<f32>,
+            [[location(1)]] inColor: vec4<f32>) -> VSOut {
+        var vsOut: VSOut;
+        vsOut.Position = uniforms.modelViewProjectionMatrix * inPos;
+        vsOut.color = inColor;
+        return vsOut;
+    }
+  `,
+  fragment: `
+    [[stage(fragment)]]
+    fn main([[location(0)]] inColor: vec4<f32>) -> [[location(0)]] vec4<f32> {
+        return inColor;
+    }
+  `,
+};
+
 export class MultiGeometry extends SceneGraph {
     private vertexUppperLimit: number = 0xFFFFFFFF; // Possible upper limit: 26843545
     private indexUppperLimit: number = 0xFFFFFFFF; // Max of index, 
@@ -137,7 +166,8 @@ export class MultiGeometry extends SceneGraph {
     {
         super.initialize();
 
-        super.createDefaultPipeline(vertShaderCode, fragShaderCode);
+        // super.createDefaultPipeline(vertShaderCode, fragShaderCode);
+        super.createDefaultPipeline(geometryShaders.vertex, geometryShaders.fragment);
 
         this.uniformBindGroup = this.device.createBindGroup({
             layout: this.pipeline.getBindGroupLayout(0),
