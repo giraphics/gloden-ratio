@@ -90,6 +90,7 @@ window.onload = function(){
 			linePainter.updateBuffers();
 
 			renderer.render(scene, camera);
+			camera.screenToWorld(clipX, clipY);
 
 			renderOverlay(ctx, canvas);
 
@@ -116,7 +117,17 @@ window.onload = function(){
 	}
 	var lastMouseX=-1; 
 	var lastMouseY=-1;
+	var clipX=-1; 
+	var clipY=-1;
 	canvas.onmousemove = (event: MouseEvent) => {
+		const rect = canvas.getBoundingClientRect();
+		const x = event.clientX - rect.left;
+		const y = event.clientY - rect.top;
+	 
+		clipX = x / rect.width  *  2 - 1;
+		clipY = y / rect.height * -2 + 1;
+//		console.log("ClipX: " + clipX, "ClipY: " + clipY);
+
 		if (!mouseDown) {
 			return;
 		}

@@ -188,7 +188,7 @@ export default class BaseShape extends AbstractShape {
         mat4.rotateX(modelMatrix, modelMatrix, this.rotation[0]);
         mat4.rotateY(modelMatrix, modelMatrix, this.rotation[1]);
         mat4.rotateZ(modelMatrix, modelMatrix, this.rotation[2]);
-        this.rotation[1] += 0.01;
+        //this.rotation[1] += 0.01;
         if (this.rotation[1] > 6.14) {
             this.rotation[1] = 0.0;
         }
