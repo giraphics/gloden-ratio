@@ -68,46 +68,66 @@ export class Renderer {
             this.canvasCtx = this.canvas.getContext('webgpu');
         }
 
-        this.canvasCtx.configure({
-            device: this.device,
-            format: this.presentationFormat,
-            size: [this.canvas.width, this.canvas.height, 1],
-            usage:
-                GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
-        });
+        // if ((this.ctx.lastWidth != this.canvas.width) || (this.ctx.lastHeight != this.canvas.height)) 
+        {
+            if ((this.ctx.lastWidth != this.canvas.width) || (this.ctx.lastHeight != this.canvas.height)) {
+            this.canvasCtx.configure({
+                    device: this.device,
+                    format: this.presentationFormat,
+                    size: [this.canvas.width, this.canvas.height, 1],
+                    usage:
+                        GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
+                });
+            }
 
-        if (this.colorTexture){
-            this.colorTexture.destroy();
-        }
-        
-        if (this.sampleCount > 1) {
-            this.colorTexture = this.device.createTexture({
+            if ((this.ctx.lastWidth != this.canvas.width) || (this.ctx.lastHeight != this.canvas.height)) 
+            {
+                if (this.colorTexture){
+                    this.colorTexture.destroy();
+                }
+                
+                if (this.sampleCount > 1) {
+                    this.colorTexture = this.device.createTexture({
+                        size: [this.canvas.width, this.canvas.height, 1],
+                        sampleCount: this.ctx.sampleCount,
+                        format: this.presentationFormat,
+                        usage: GPUTextureUsage.RENDER_ATTACHMENT,
+                    });
+                }
+                else {
+                    this.colorTexture = this.canvasCtx.getCurrentTexture();
+                }
+            }
+
+            if (this.sampleCount > 1){
+
+            }
+            else{
+            this.colorTexture = this.canvasCtx.getCurrentTexture();
+            }
+            this.colorTextureView = this.colorTexture.createView();
+
+            const depthTextureDesc: GPUTextureDescriptor = {
                 size: [this.canvas.width, this.canvas.height, 1],
                 sampleCount: this.ctx.sampleCount,
-                format: this.presentationFormat,
-                usage: GPUTextureUsage.RENDER_ATTACHMENT,
-            });
+                dimension: '2d',
+                format: 'depth24plus-stencil8',
+                usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
+            };
+
+            if ((this.ctx.lastWidth != this.canvas.width) || (this.ctx.lastHeight != this.canvas.height)) 
+            {
+                if (this.depthTexture) {
+                    this.depthTexture.destroy();
+                }
+
+                this.depthTexture = this.device.createTexture(depthTextureDesc);
+                this.depthTextureView = this.depthTexture.createView();
+
+                this.ctx.lastWidth = this.canvas.width;
+                this.ctx.lastHeight = this.canvas.height;    
+            }
         }
-        else {
-            this.colorTexture = this.canvasCtx.getCurrentTexture();
-        }
-
-        this.colorTextureView = this.colorTexture.createView();
-
-        const depthTextureDesc: GPUTextureDescriptor = {
-            size: [this.canvas.width, this.canvas.height, 1],
-            sampleCount: this.ctx.sampleCount,
-            dimension: '2d',
-            format: 'depth24plus-stencil8',
-            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
-        };
-
-        if (this.depthTexture) {
-            this.depthTexture.destroy();
-        }
-
-        this.depthTexture = this.device.createTexture(depthTextureDesc);
-        this.depthTextureView = this.depthTexture.createView();
     }
 
     renderScene(scene: Scene, camera: Camera) {       
