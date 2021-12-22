@@ -20,10 +20,9 @@ export class Renderer {
     private colorTextureView: GPUTextureView;
     private depthTexture: GPUTexture;
     private depthTextureView: GPUTextureView;
-//    private sampleCount:number = 1;
+    private sampleCount:number = 1;
     
     private commandEncoder: GPUCommandEncoder;
-  //  private passEncoder: GPURenderPassEncoder;
     private presentationFormat: GPUTextureFormat;
 
     constructor(canvas: HTMLCanvasElement, binding: Binding, primitive: Number) {
@@ -41,7 +40,7 @@ export class Renderer {
                 return false;
             }
 
-            this.ctx = new Context(4);
+            this.ctx = new Context(this.sampleCount);
             // Physical Device Adapter
             this.adapter = await entry.requestAdapter();
 
@@ -67,32 +66,34 @@ export class Renderer {
         // Swapchain
         if (!this.canvasCtx) {
             this.canvasCtx = this.canvas.getContext('webgpu');
-            const canvasConfig: GPUCanvasConfiguration = {
-                device: this.device,
-                format: this.presentationFormat,
-                usage:
-                    GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
-            };
-            //this.context.configure(canvasConfig);
         }
 
         this.canvasCtx.configure({
             device: this.device,
             format: this.presentationFormat,
             size: [this.canvas.width, this.canvas.height, 1],
-          });
+            usage:
+                GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
+        });
 
         if (this.colorTexture){
             this.colorTexture.destroy();
         }
-        this.colorTexture = this.device.createTexture({
-            size: [this.canvas.width, this.canvas.height, 1],
-            sampleCount: this.ctx.sampleCount,
-            format: this.presentationFormat,
-            usage: GPUTextureUsage.RENDER_ATTACHMENT,
-          });
-        this.colorTextureView = this.colorTexture.createView();
         
+        if (this.sampleCount > 1) {
+            this.colorTexture = this.device.createTexture({
+                size: [this.canvas.width, this.canvas.height, 1],
+                sampleCount: this.ctx.sampleCount,
+                format: this.presentationFormat,
+                usage: GPUTextureUsage.RENDER_ATTACHMENT,
+            });
+        }
+        else {
+            this.colorTexture = this.canvasCtx.getCurrentTexture();
+        }
+
+        this.colorTextureView = this.colorTexture.createView();
+
         const depthTextureDesc: GPUTextureDescriptor = {
             size: [this.canvas.width, this.canvas.height, 1],
             sampleCount: this.ctx.sampleCount,
@@ -117,18 +118,31 @@ export class Renderer {
       
     render = (scene: Scene, camera: Camera) => {
         this.resizeBackings();
-        // Acquire next image from context
-        //this.colorTexture = this.context.getCurrentTexture();
-        //this.colorTextureView = this.colorTexture.createView();
 
-        // let colorAttachment: GPURenderPassColorAttachment = {
-        //     view: this.colorTextureView,
-        //     loadValue: { r: 0.2, g: 0.2, b: 0.2, a: 1.0 },
-        //     storeOp: 'store'
-        // };
-        let colorAttachment: GPURenderPassColorAttachment = {
+        //let colorAttachment: GPURenderPassColorAttachment;
+        // if (this.sampleCount > 1) {
+        //     colorAttachment = {
+        //         view: this.colorTextureView,
+        //         resolveTarget: this.canvasCtx.getCurrentTexture().createView(),
+        //         loadValue: { r: 0.2, g: 0.2, b: 0.2, a: 1.0 },
+        //         storeOp: 'store'
+        //     };
+        // }
+        // else {
+        //     colorAttachment = {
+        //         view: this.colorTextureView,
+        //         loadValue: { r: 0.2, g: 0.2, b: 0.2, a: 1.0 },
+        //         storeOp: 'store'
+        //     };
+        // }
+
+        const colorAttachment: GPURenderPassColorAttachment = (this.sampleCount > 1) ? {
             view: this.colorTextureView,
             resolveTarget: this.canvasCtx.getCurrentTexture().createView(),
+            loadValue: { r: 0.2, g: 0.2, b: 0.2, a: 1.0 },
+            storeOp: 'store'
+        } : {
+            view: this.colorTextureView,
             loadValue: { r: 0.2, g: 0.2, b: 0.2, a: 1.0 },
             storeOp: 'store'
         };
