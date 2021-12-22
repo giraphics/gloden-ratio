@@ -20,7 +20,7 @@ export class Renderer {
     private colorTextureView: GPUTextureView;
     private depthTexture: GPUTexture;
     private depthTextureView: GPUTextureView;
-    private sampleCount:number = 1;
+    private sampleCount:number = 4;
     
     private commandEncoder: GPUCommandEncoder;
     private presentationFormat: GPUTextureFormat;
@@ -68,9 +68,7 @@ export class Renderer {
             this.canvasCtx = this.canvas.getContext('webgpu');
         }
 
-        // if ((this.ctx.lastWidth != this.canvas.width) || (this.ctx.lastHeight != this.canvas.height)) 
-        {
-            if ((this.ctx.lastWidth != this.canvas.width) || (this.ctx.lastHeight != this.canvas.height)) {
+        if ((this.ctx.lastWidth != this.canvas.width) || (this.ctx.lastHeight != this.canvas.height)) {
             this.canvasCtx.configure({
                     device: this.device,
                     format: this.presentationFormat,
@@ -78,34 +76,26 @@ export class Renderer {
                     usage:
                         GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
                 });
+
+            if (this.colorTexture){
+                this.colorTexture.destroy();
+            }
+            
+            if (this.sampleCount > 1) {
+                this.colorTexture = this.device.createTexture({
+                    size: [this.canvas.width, this.canvas.height, 1],
+                    sampleCount: this.ctx.sampleCount,
+                    format: this.presentationFormat,
+                    usage: GPUTextureUsage.RENDER_ATTACHMENT,
+                });
+            }
+            else {
+                this.colorTexture = this.canvasCtx.getCurrentTexture();
             }
 
-            if ((this.ctx.lastWidth != this.canvas.width) || (this.ctx.lastHeight != this.canvas.height)) 
-            {
-                if (this.colorTexture){
-                    this.colorTexture.destroy();
-                }
-                
-                if (this.sampleCount > 1) {
-                    this.colorTexture = this.device.createTexture({
-                        size: [this.canvas.width, this.canvas.height, 1],
-                        sampleCount: this.ctx.sampleCount,
-                        format: this.presentationFormat,
-                        usage: GPUTextureUsage.RENDER_ATTACHMENT,
-                    });
-                }
-                else {
-                    this.colorTexture = this.canvasCtx.getCurrentTexture();
-                }
+            if (this.depthTexture) {
+                this.depthTexture.destroy();
             }
-
-            if (this.sampleCount > 1){
-
-            }
-            else{
-            this.colorTexture = this.canvasCtx.getCurrentTexture();
-            }
-            this.colorTextureView = this.colorTexture.createView();
 
             const depthTextureDesc: GPUTextureDescriptor = {
                 size: [this.canvas.width, this.canvas.height, 1],
@@ -115,19 +105,17 @@ export class Renderer {
                 usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
             };
 
-            if ((this.ctx.lastWidth != this.canvas.width) || (this.ctx.lastHeight != this.canvas.height)) 
-            {
-                if (this.depthTexture) {
-                    this.depthTexture.destroy();
-                }
+            this.depthTexture = this.device.createTexture(depthTextureDesc);
+            this.depthTextureView = this.depthTexture.createView();
 
-                this.depthTexture = this.device.createTexture(depthTextureDesc);
-                this.depthTextureView = this.depthTexture.createView();
-
-                this.ctx.lastWidth = this.canvas.width;
-                this.ctx.lastHeight = this.canvas.height;    
-            }
+            this.ctx.lastWidth = this.canvas.width;
+            this.ctx.lastHeight = this.canvas.height;
         }
+
+        if (this.sampleCount == 1) {
+            this.colorTexture = this.canvasCtx.getCurrentTexture();
+        }
+        this.colorTextureView = this.colorTexture.createView();
     }
 
     renderScene(scene: Scene, camera: Camera) {       
@@ -138,23 +126,6 @@ export class Renderer {
       
     render = (scene: Scene, camera: Camera) => {
         this.resizeBackings();
-
-        //let colorAttachment: GPURenderPassColorAttachment;
-        // if (this.sampleCount > 1) {
-        //     colorAttachment = {
-        //         view: this.colorTextureView,
-        //         resolveTarget: this.canvasCtx.getCurrentTexture().createView(),
-        //         loadValue: { r: 0.2, g: 0.2, b: 0.2, a: 1.0 },
-        //         storeOp: 'store'
-        //     };
-        // }
-        // else {
-        //     colorAttachment = {
-        //         view: this.colorTextureView,
-        //         loadValue: { r: 0.2, g: 0.2, b: 0.2, a: 1.0 },
-        //         storeOp: 'store'
-        //     };
-        // }
 
         const colorAttachment: GPURenderPassColorAttachment = (this.sampleCount > 1) ? {
             view: this.colorTextureView,
