@@ -198,6 +198,9 @@ export class Particles extends SceneGraph {
             fragment,
 
             primitive,
+            multisample: {
+                count: 4,
+              },
             depthStencil
         };
         this.pipeline = this.device.createRenderPipeline(pipelineDesc);        

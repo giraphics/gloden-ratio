@@ -1,9 +1,10 @@
 import UUID from './objid';
+import { Context } from './../renderer/context';
 import { Camera } from './../renderer/camera';
 import {PRIMITIVE_TYPE, TYPE_SIZE} from './../renderer/constants';
 import { mat4, vec3 } from 'gl-matrix';
 
-export abstract class AbstractShape extends UUID{
+export abstract class AbstractShape extends UUID {
     public abstract draw(passEncoder: GPURenderPassEncoder, camera: Camera) : void;
 }
 
@@ -176,7 +177,9 @@ export default class BaseShape extends AbstractShape {
             fragment,
 
             primitive,
-            depthStencil
+            multisample: {
+                count: 4,
+              },            depthStencil
         };
         this.pipeline = this.device.createRenderPipeline(pipelineDesc);        
     }

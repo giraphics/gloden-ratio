@@ -85,6 +85,8 @@ window.onload = function(){
 		ctx.font = '50px serif';
 		ctx.fillStyle = 'red';
 		const doFrame = () => {
+			// TODO bring AS to some place more implicit.
+			camera.aspect = canvas.width / canvas.height;
 			shapetest.drawGrid(linePainter, 1);
 			
 			linePainter.updateBuffers();

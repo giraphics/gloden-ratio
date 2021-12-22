@@ -1,6 +1,8 @@
 import Binding from '../binder/binding';
 
 var mainarea = null;
+var gwidth = 800;
+var gheight = 640;
 
 export default class Gui {
     binding: Binding;
@@ -77,21 +79,21 @@ export default class Gui {
         // Create canvas 1
         var canvas = document.createElement("canvas");
         canvas.id = 'webgpu-canvas';
-        canvas.width = 630; // 800
-        canvas.height = 640;
+        canvas.width = gwidth;
+        canvas.height = gheight;
 
         var canvasText = document.createElement("canvas");
         canvasText.id = 'canvasText';
-        canvasText.width = 630; // 800
-        canvasText.height = 640;
+        canvasText.width =  gwidth
+        canvasText.height = gheight;
         canvasText.style.top = '0px'; // Must specify unit.
         canvasText.style.position = 'absolute'; // Must specify unit.
         canvasText.style.pointerEvents = 'none';
 		canvasText.times = 0;
 		canvasText.redraw = function() {
 			var rect = canvasText.parentNode.getClientRects()[0];
-            canvasText.width = rect.width > 630 ? 630 : rect.width;
-            canvasText.height = rect.height > 640 ? 640 : rect.height;
+            canvasText.width = rect.width > gwidth ? gwidth : rect.width;
+            canvasText.height = rect.height > gheight ? gheight : rect.height;
 			var ctx = canvasText.getContext("2d");
 			ctx.clearRect(0, 0, this.width, this.height);
 			ctx.lineWidth = 1;
@@ -104,8 +106,9 @@ export default class Gui {
 
         canvas.redraw = function() {
 			var rect = canvas.parentNode.getClientRects()[0];
-            canvas.width = rect.width > 630 ? 630 : rect.width;
-            canvas.height = rect.height > 640 ? 640 : rect.height;
+            canvas.width = rect.width > gwidth ? gwidth : rect.width;
+            canvas.height = rect.height > gheight ? gheight : rect.height;
+            console.log("Canvas Left Resize: " + canvas.width + ", " + canvas.height);
         }
 		
         mainarea.getSection(0).getSection(0).getSection(0).onresize = function() { canvas.redraw(); canvasText.redraw();};
@@ -115,13 +118,14 @@ export default class Gui {
         // Create canvas 2
         var canvas2 = document.createElement("canvas");
         canvas2.id = 'webgpu-canvas2';
-        canvas2.width = 630;
-        canvas2.height = 640;
+        canvas2.width = gwidth;
+        canvas2.height = gheight;
 
         canvas2.redraw = function() {
 			var rect = canvas2.parentNode.getClientRects()[0];
-            canvas2.width = rect.width > 630 ? 630 : rect.width;
-            canvas2.height = rect.height > 640 ? 640 : rect.height;
+            canvas2.width = rect.width > gwidth ? gwidth : rect.width;
+            canvas2.height = rect.height > gheight ? gheight : rect.height;
+            console.log("Canvas Right Resize: " + canvas2.width + ", " + canvas2.height);
 		}
 		mainarea.getSection(0).getSection(0).getSection(1).onresize = function() { canvas2.redraw(); };
         mainarea.getSection(0).getSection(0).getSection(1).content.appendChild(canvas2);
