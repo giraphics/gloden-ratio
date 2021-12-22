@@ -1,6 +1,7 @@
 import vertShaderCode from './shaders/pointcloud.vert.wgsl';
 import fragShaderCode from './shaders/pointcloud.frag.wgsl';
 import { mat4, vec3 } from 'gl-matrix';
+import { Context } from './../renderer/context';
 import Binding from '../../binder/binding';
 import { Camera } from './../renderer/camera';
 import SceneGraph from './../base/scenegraph';
@@ -75,10 +76,11 @@ export class Particles extends SceneGraph {
     private position: Float32Array;
     private color: Float32Array;
 
-    constructor(device: GPUDevice, primitive: Number, binding: Binding, primitiveType: PRIMITIVE_TYPE) {
+    constructor(context: Context, device: GPUDevice, primitive: Number, binding: Binding, primitiveType: PRIMITIVE_TYPE) {
         super(primitiveType, [TYPE_SIZE.float32x4, TYPE_SIZE.float32x4, TYPE_SIZE.float32x2]);
         
         this.device = device;
+        this.ctx = context;
         this.primitive = primitive;
         this.binding = binding;
 
@@ -196,11 +198,8 @@ export class Particles extends SceneGraph {
         const pipelineDesc: GPURenderPipelineDescriptor = {
             vertex,
             fragment,
-
             primitive,
-            multisample: {
-                count: 4,
-              },
+            multisample: { count: this.ctx.sampleCount, },
             depthStencil
         };
         this.pipeline = this.device.createRenderPipeline(pipelineDesc);        
@@ -266,10 +265,11 @@ export class Particles extends SceneGraph {
         }
     }
 
-    public draw(passEncoder: GPURenderPassEncoder, camera: Camera): void {
-        super.draw(passEncoder, camera);
+    public draw(ctx: Context, camera: Camera): void {
+        super.draw(ctx, camera);
         this.update(); // Updathis.camerathis.camerathis.camerathis.camerate the position first
 
+        let passEncoder = ctx.passEncoder;
         passEncoder.setPipeline(this.pipeline);
         
         this.device.queue.writeBuffer(

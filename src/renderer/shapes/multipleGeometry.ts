@@ -1,6 +1,7 @@
 import vertShaderCode from './shaders/geometry.vert.wgsl';
 import fragShaderCode from './shaders/geometry.frag.wgsl';
 import { Camera } from './../renderer/camera';
+import { Context } from './../renderer/context';
 import SceneGraph from './../base/scenegraph';
 import {PRIMITIVE_TYPE, TYPE_SIZE} from './../renderer/constants';
 
@@ -59,11 +60,13 @@ export class MultiGeometry extends SceneGraph {
     // Uniform Binding
     protected uniformBindGroup: GPUBindGroup;
     
-    constructor(device: GPUDevice, primitiveType: PRIMITIVE_TYPE, vertexUppperLimit?: number) {
+    constructor(context: Context, device: GPUDevice, primitiveType: PRIMITIVE_TYPE, vertexUppperLimit?: number) {
         // presently type info is 10 elements fixed vertex 4, color 4, uv 2
         super(primitiveType, /*typeInfo*/ [TYPE_SIZE.float32x4, TYPE_SIZE.float32x4, TYPE_SIZE.float32x2]);
         
         this.device = device;
+        this.ctx = context;
+        
         if (vertexUppperLimit) {
             this.vertexInitLimit = vertexUppperLimit;
         }
@@ -184,9 +187,10 @@ export class MultiGeometry extends SceneGraph {
         });
     }
 
-    public draw(passEncoder: GPURenderPassEncoder, camera: Camera): void {
-        super.draw(passEncoder, camera);
+    public draw(ctx: Context, camera: Camera): void {
+        super.draw(ctx, camera);
         
+        let passEncoder = ctx.passEncoder;
         passEncoder.setPipeline(this.pipeline);
         
         this.device.queue.writeBuffer(

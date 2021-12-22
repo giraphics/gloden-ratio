@@ -72,8 +72,8 @@ window.onload = function(){
 
 		const scene = new GoldenRatio.Scene();
 		const shapetest = new ShapeTest;
-		const linePainter = new GoldenRatio.MultiGeometry(renderer.device, GoldenRatio.PRIMITIVE_TYPE.LINE_LIST);
-		scene.add(new GoldenRatio.Particles(renderer.device, renderer.primitive, renderer.binding, GoldenRatio.PRIMITIVE_TYPE.POINT_LIST));
+		const linePainter = new GoldenRatio.MultiGeometry(renderer.ctx, renderer.device, GoldenRatio.PRIMITIVE_TYPE.LINE_LIST);
+		scene.add(new GoldenRatio.Particles(renderer.ctx, renderer.device, renderer.primitive, renderer.binding, GoldenRatio.PRIMITIVE_TYPE.POINT_LIST));
 		scene.add(linePainter);
 
 		img = new Image(100, 200); // width, height
@@ -159,8 +159,8 @@ window.onload = function(){
 
 		const scene2 = new GoldenRatio.Scene();
 		const shapetest = new ShapeTest;
-		const trianglePainter = new GoldenRatio.MultiGeometry(renderer2.device, GoldenRatio.PRIMITIVE_TYPE.TRIANGLE_LIST);
-		const linePainter = new GoldenRatio.MultiGeometry(renderer2.device, GoldenRatio.PRIMITIVE_TYPE.LINE_LIST);
+		const trianglePainter = new GoldenRatio.MultiGeometry(renderer2.ctx, renderer2.device, GoldenRatio.PRIMITIVE_TYPE.TRIANGLE_LIST);
+		const linePainter = new GoldenRatio.MultiGeometry(renderer2.ctx, renderer2.device, GoldenRatio.PRIMITIVE_TYPE.LINE_LIST);
         scene2.add(trianglePainter);
         scene2.add(linePainter);
 

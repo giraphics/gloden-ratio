@@ -15,7 +15,7 @@ export class Renderer {
 
     // Frame Backings
     private canvasCtx: GPUCanvasContext;
-    private ctx: Context;
+    public ctx: Context;
     private colorTexture: GPUTexture;
     private colorTextureView: GPUTextureView;
     private depthTexture: GPUTexture;
@@ -111,7 +111,7 @@ export class Renderer {
 
     renderScene(scene: Scene, camera: Camera) {       
         for (let object of scene.getObjects()) {
-            object.draw(this.ctx.passEncoder, camera);
+            object.draw(this.ctx, camera);
         }
     }
       

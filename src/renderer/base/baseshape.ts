@@ -5,11 +5,12 @@ import {PRIMITIVE_TYPE, TYPE_SIZE} from './../renderer/constants';
 import { mat4, vec3 } from 'gl-matrix';
 
 export abstract class AbstractShape extends UUID {
-    public abstract draw(passEncoder: GPURenderPassEncoder, camera: Camera) : void;
+    public abstract draw(ctx: Context, camera: Camera) : void;
 }
 
 export default class BaseShape extends AbstractShape {
     public device: GPUDevice;
+    public ctx: Context;
 
     protected vertModule: GPUShaderModule;
     protected fragModule: GPUShaderModule;
@@ -175,16 +176,14 @@ export default class BaseShape extends AbstractShape {
         const pipelineDesc: GPURenderPipelineDescriptor = {
             vertex,
             fragment,
-
             primitive,
-            multisample: {
-                count: 4,
-              },            depthStencil
+            multisample: { count: this.ctx.sampleCount, },
+            depthStencil
         };
         this.pipeline = this.device.createRenderPipeline(pipelineDesc);        
     }
 
-    public draw(passEncoder: GPURenderPassEncoder, camera: Camera): void {
+    public draw(ctx: Context, camera: Camera) : void {
         // MOVE / TRANSLATE OBJECT
         const modelMatrix = mat4.create();
         mat4.translate(modelMatrix, modelMatrix, vec3.fromValues(this.translate[0], this.translate[1], this.translate[2]));
