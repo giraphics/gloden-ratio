@@ -123,12 +123,12 @@ export default class Renderer {
 
         // 🔣 Input Assembly
         const positionAttribDesc: GPUVertexAttribute = {
-            shaderLocation: 0, // [[location(0)]]
+            shaderLocation: 0, // @location(0)
             offset: 0,
             format: 'float32x3'
         };
         const colorAttribDesc: GPUVertexAttribute = {
-            shaderLocation: 1, // [[location(1)]]
+            shaderLocation: 1, // @location(1)
             offset: 0,
             format: 'float32x3'
         };
@@ -220,15 +220,18 @@ export default class Renderer {
     encodeCommands() {
         let colorAttachment: GPURenderPassColorAttachment = {
             view: this.colorTextureView,
-            loadValue: { r: 0, g: 0, b: 0, a: 1 },
+            loadOp: 'clear',
+            clearValue: { r: 0, g: 0, b: 0, a: 1 },
             storeOp: 'store'
         };
 
         const depthAttachment: GPURenderPassDepthStencilAttachment = {
             view: this.depthTextureView,
-            depthLoadValue: 1,
+            depthLoadOp: 'clear',
+            depthClearValue: 1,
             depthStoreOp: 'store',
-            stencilLoadValue: 'load',
+            stencilLoadOp: 'clear',
+            stencilClearValue: 0,
             stencilStoreOp: 'store'
         };
 
@@ -260,7 +263,7 @@ export default class Renderer {
         this.passEncoder.setVertexBuffer(1, this.colorBuffer);
         this.passEncoder.setIndexBuffer(this.indexBuffer, 'uint16');
         this.passEncoder.drawIndexed(3, 1);
-        this.passEncoder.endPass();
+        this.passEncoder.end();
 
         this.queue.submit([this.commandEncoder.finish()]);
     }

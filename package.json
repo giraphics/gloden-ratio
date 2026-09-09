@@ -1,7 +1,7 @@
 {
-    "name": "webgpu-seed",
+    "name": "gloden-ratio",
     "version": "0.1.0",
-    "description": "🔺 A simple hello triangle example introducing WebGPU.",
+    "description": "WebGPU hello triangle with a LiteGUI editor shell.",
     "main": "dist/main.js",
     "scripts": {
         "start": "npm i && npm run build && npm run dev",
@@ -10,7 +10,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/alaingalvan/webgpu-seed.git"
+        "url": "git+https://github.com/giraphics/gloden-ratio.git"
     },
     "keywords": [
         "webgpu",
@@ -20,12 +20,12 @@
         "types",
         "typescript"
     ],
-    "author": "Alain Galvan",
+    "author": "giraphics",
     "license": "Unlicense",
     "bugs": {
-        "url": "https://github.com/alaingalvan/webgpu-seed/issues"
+        "url": "https://github.com/giraphics/gloden-ratio/issues"
     },
-    "homepage": "https://github.com/alaingalvan/webgpu-seed#readme",
+    "homepage": "https://github.com/giraphics/gloden-ratio#readme",
     "devDependencies": {
         "@types/node": "^16.6.x",
         "@webgpu/types": "^0.1.6",
@@ -35,12 +35,11 @@
         "ts-loader": "^9.2.x",
         "ts-node": "^10.2.x",
         "typescript": "^4.3.x",
-        "webpack": "^5.51.x"
+        "webpack": "^5.110.3"
     },
     "dependencies": {
         "css-loader": "^6.3.0",
         "gl-matrix": "^3.3.0",
-        "liteguijs": "^1.0.2",
         "style-loader": "^3.3.0"
     }
 }
